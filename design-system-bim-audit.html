@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIM Audit · Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS — BIM AUDIT
+   Extraídos da interface: audit-bimvercelapp.vercel.app
+══════════════════════════════════════════════ */
+:root {
+  /* ── TIPOGRAFIA ── */
+  --font-sans:  "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:  "DM Mono", "SFMono-Regular", Consolas, monospace;
+
+  --font-size-micro:    0.6875rem;   /* 11px */
+  --font-size-mini:     0.75rem;     /* 12px */
+  --font-size-small:    0.8125rem;   /* 13px */
+  --font-size-body:     0.9375rem;   /* 15px */
+  --font-size-large:    1.0625rem;   /* 17px */
+  --font-size-title3:   1.25rem;     /* 20px */
+  --font-size-title2:   1.5rem;      /* 24px */
+  --font-size-title1:   2rem;        /* 32px */
+  --font-size-display:  2.75rem;     /* 44px */
+
+  --font-weight-light:    300;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:    1.2;
+  --line-height-snug:     1.4;
+  --line-height-normal:   1.6;
+  --line-height-relaxed:  1.75;
+
+  --letter-spacing-tight:  -0.02em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide:   0.04em;
+  --letter-spacing-wider:  0.08em;
+
+  /* ── CORES PRIMÁRIAS ── */
+  --color-primary:         #1e3a5f;   /* azul marinho — sidebar, topbar */
+  --color-primary-hover:   #16304f;
+  --color-primary-light:   #2a4f7a;
+  --color-primary-subtle:  #e8eef5;
+
+  /* ── CORES DE ACENTO ── */
+  --color-accent-blue:     #4a7fc1;   /* azul médio — ícones, links */
+  --color-accent-teal:     #2ea8a8;   /* KPI: total de itens */
+  --color-accent-orange:   #e8820c;   /* KPI: próxima auditoria, alerta */
+  --color-accent-green:    #22a04b;   /* KPI: conformidade, sucesso */
+  --color-accent-red:      #d93025;   /* KPI: pendências, erro */
+  --color-accent-purple:   #7c5cbf;   /* variação */
+
+  /* ── CORES NEUTRAS ── */
+  --color-white:       #ffffff;
+  --color-gray-50:     #f8f9fa;
+  --color-gray-100:    #f1f3f5;
+  --color-gray-200:    #e9ecef;
+  --color-gray-300:    #dee2e6;
+  --color-gray-400:    #ced4da;
+  --color-gray-500:    #adb5bd;
+  --color-gray-600:    #6c757d;
+  --color-gray-700:    #495057;
+  --color-gray-800:    #343a40;
+  --color-gray-900:    #212529;
+
+  /* ── CORES SEMÂNTICAS ── */
+  --color-success:         #22a04b;
+  --color-success-bg:      #d4edda;
+  --color-success-border:  #a8d5b5;
+  --color-warning:         #e8820c;
+  --color-warning-bg:      #fff3cd;
+  --color-warning-border:  #ffc979;
+  --color-error:           #d93025;
+  --color-error-bg:        #fce8e6;
+  --color-error-border:    #f5a8a3;
+  --color-info:            #4a7fc1;
+  --color-info-bg:         #ddeeff;
+  --color-info-border:     #a8c8ef;
+
+  /* ── SUPERFÍCIES ── */
+  --surface-sidebar:       #1e3a5f;
+  --surface-topbar:        #1e3a5f;
+  --surface-base:          #f4f6f8;
+  --surface-card:          #ffffff;
+  --surface-card-hover:    #f8f9fa;
+  --surface-overlay:       rgba(30, 58, 95, 0.08);
+
+  /* ── BORDAS ── */
+  --border-light:          #e9ecef;
+  --border-medium:         #dee2e6;
+  --border-strong:         #ced4da;
+  --border-card-top-black: #2c3e50;      /* borda top do card escuro */
+  --border-card-top-teal:  #2ea8a8;
+  --border-card-top-orange:#e8820c;
+  --border-card-top-green: #22a04b;
+  --border-card-top-red:   #d93025;
+
+  /* ── TEXTO ── */
+  --text-on-primary:       #ffffff;
+  --text-on-primary-muted: rgba(255,255,255,0.65);
+  --text-primary:          #1a2332;
+  --text-secondary:        #495057;
+  --text-tertiary:         #6c757d;
+  --text-disabled:         #adb5bd;
+  --text-link:             #4a7fc1;
+  --text-link-hover:       #1e3a5f;
+
+  /* ── SOMBRAS ── */
+  --shadow-xs:   0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:   0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+  --shadow-lg:   0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl:   0 20px 25px rgba(0,0,0,.1),  0 10px 10px rgba(0,0,0,.04);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+
+  /* ── RADIUS ── */
+  --radius-none:    0px;
+  --radius-sm:      4px;
+  --radius-md:      6px;
+  --radius-lg:      8px;
+  --radius-xl:      12px;
+  --radius-2xl:     16px;
+  --radius-full:    9999px;
+
+  /* ── ESPAÇAMENTO ── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+
+  /* ── LAYOUT ── */
+  --sidebar-width:   196px;
+  --topbar-height:   56px;
+  --content-max:     1280px;
+
+  /* ── ANIMAÇÃO ── */
+  --duration-instant:  0ms;
+  --duration-fast:     100ms;
+  --duration-normal:   200ms;
+  --duration-slow:     300ms;
+  --duration-slower:   500ms;
+
+  --ease-out-cubic:    cubic-bezier(.215, .61, .355, 1);
+  --ease-out-quart:    cubic-bezier(.165, .84, .44,  1);
+  --ease-out-expo:     cubic-bezier(.19,  1,   .22,  1);
+  --ease-in-out:       cubic-bezier(.645, .045, .355, 1);
+  --ease-spring:       cubic-bezier(.34,  1.56, .64,  1);
+
+  /* ── OPACIDADES ── */
+  --opacity-disabled: 0.4;
+  --opacity-muted:    0.6;
+  --opacity-subtle:   0.08;
+
+  /* ── Z-INDEX ── */
+  --z-base:     0;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+
+  /* ── TOKENS DO DOC ── */
+  --doc-bg:        #f4f6f8;
+  --doc-sidebar-bg:#1e3a5f;
+  --doc-border:    #e2e8f0;
+  --doc-sidebar-width: 220px;
+}
+
+/* ══════════════════════════════════════
+   RESET
+══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background: var(--doc-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════
+   DOC LAYOUT
+══════════════════════════════════════ */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--doc-sidebar-width);
+  flex-shrink: 0;
+  background: var(--doc-sidebar-bg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+.sidebar-logo {
+  padding: 20px 18px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-logo .logo-icon {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,.15);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo h1 {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: #fff;
+  letter-spacing: var(--letter-spacing-tight);
+}
+.sidebar-logo p {
+  font-size: var(--font-size-mini);
+  color: rgba(255,255,255,.5);
+  margin-top: 1px;
+}
+
+.nav-section {
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+  padding: 18px 18px 5px;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 18px;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  color: rgba(255,255,255,.65);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out-cubic),
+              color var(--duration-fast) var(--ease-out-cubic);
+}
+.sidebar nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+.sidebar nav a.active {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  font-weight: var(--font-weight-medium);
+}
+.sidebar nav a .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.3);
+  margin-left: auto;
+  flex-shrink: 0;
+  display: none;
+}
+.sidebar nav a.active .dot { display: block; background: #74b9ff; }
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 48px 56px;
+  max-width: calc(100% - var(--doc-sidebar-width));
+}
+
+/* ══════════════════════════════════════
+   SEÇÕES
+══════════════════════════════════════ */
+section { margin-bottom: 72px; }
+section:last-child { margin-bottom: 0; }
+
+.section-eyebrow {
+  font-size: var(--font-size-mini);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--color-accent-blue);
+  margin-bottom: 6px;
+}
+.section-title {
+  font-size: var(--font-size-title2);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: var(--line-height-tight);
+}
+.section-desc {
+  font-size: var(--font-size-body);
+  color: var(--text-tertiary);
+  margin-bottom: 28px;
+  max-width: 620px;
+  line-height: var(--line-height-relaxed);
+}
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--doc-border);
+  margin: 32px 0;
+}
+
+/* ══════════════════════════════════════
+   GRIDS
+══════════════════════════════════════ */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.component-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+/* ══════════════════════════════════════
+   CARDS BASE
+══════════════════════════════════════ */
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5) var(--space-6);
+}
+.card-demo {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+}
+
+/* ══════════════════════════════════════
+   KPI CARDS
+══════════════════════════════════════ */
+.kpi-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 18px 20px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.kpi-card.dark::before  { background: var(--border-card-top-black); }
+.kpi-card.teal::before  { background: var(--border-card-top-teal); }
+.kpi-card.orange::before{ background: var(--border-card-top-orange); }
+.kpi-card.green::before { background: var(--border-card-top-green); }
+.kpi-card.red::before   { background: var(--border-card-top-red); }
+
+.kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.kpi-label {
+  font-size: var(--font-size-small);
+  color: var(--text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+.kpi-icon {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.kpi-icon.dark-icon   { background: #f0f2f5; color: var(--color-primary); }
+.kpi-icon.teal-icon   { background: #e0f5f5; color: var(--color-accent-teal); }
+.kpi-icon.orange-icon { background: #fff0e0; color: var(--color-accent-orange); }
+.kpi-icon.green-icon  { background: #e6f7ed; color: var(--color-accent-green); }
+.kpi-icon.red-icon    { background: #fce8e6; color: var(--color-accent-red); }
+
+.kpi-value {
+  font-size: var(--font-size-title1);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.kpi-value.dark   { color: var(--text-primary); }
+.kpi-value.teal   { color: var(--color-accent-teal); }
+.kpi-value.orange { color: var(--color-accent-orange); }
+.kpi-value.green  { color: var(--color-accent-green); }
+.kpi-value.red    { color: var(--color-accent-red); }
+
+.kpi-sub {
+  font-size: var(--font-size-mini);
+  color: var(--text-tertiary);
+}
+.kpi-link {
+  font-size: var(--font-size-mini);
+  color: var(--color-accent-blue);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+}
+.kpi-link:hover { text-decoration: underline; }
+
+.kpi-progress {
+  margin-top: 10px;
+}
+.kpi-progress-bar {
+  height: 4px;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.kpi-progress-fill {
+  height: 100%;
+  background: var(--color-accent-green);
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out-expo);
+}
+
+/* ══════════════════════════════════════
+   CORES
+══════════════════════════════════════ */
+.color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 24px; }
+.color-swatch {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.06);
+}
+.color-swatch .swatch-color { height: 56px; }
+.color-swatch .swatch-info { padding: 8px 10px; background: var(--surface-card); }
+.color-swatch .swatch-name { font-size: var(--font-size-mini); font-weight: var(--font-weight-semibold); color: var(--text-primary); display: block; }
+.color-swatch .swatch-hex  { font-size: 0.6875rem; color: var(--text-tertiary); font-family: var(--font-mono); }
+.color-swatch .swatch-var  { font-size: 0.6rem; color: var(--text-disabled); font-family: var(--font-mono); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ══════════════════════════════════════
+   TIPOGRAFIA
+══════════════════════════════════════ */
+.type-sample { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--doc-border); }
+.type-sample:last-child { border-bottom: none; margin-bottom: 0; }
+.type-meta { font-size: var(--font-size-mini); color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 4px; display: flex; gap: 16px; }
+.type-meta span { background: var(--color-gray-100); padding: 1px 6px; border-radius: 3px; }
+
+/* ══════════════════════════════════════
+   BOTÕES
+══════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-small);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-out-cubic),
+    box-shadow  var(--duration-fast) var(--ease-out-cubic),
+    transform   var(--duration-fast) var(--ease-out-cubic),
+    opacity     var(--duration-fast);
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+.btn:active { transform: translateY(1px); }
+
+/* Sizes */
+.btn-xs { padding: 4px 10px;  border-radius: var(--radius-sm); font-size: var(--font-size-mini); }
+.btn-sm { padding: 6px 12px;  border-radius: var(--radius-md); }
+.btn-md { padding: 8px 16px;  border-radius: var(--radius-md); }
+.btn-lg { padding: 10px 20px; border-radius: var(--radius-lg); font-size: var(--font-size-body); }
+
+/* Variants */
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(30,58,95,.2);
+}
+.btn-primary:hover { background: var(--color-primary-hover); box-shadow: 0 2px 6px rgba(30,58,95,.25); }
+
+.btn-accent {
+  background: var(--color-accent-blue);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(74,127,193,.3);
+}
+.btn-accent:hover { background: #3d6faf; }
+
+.btn-secondary {
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-xs);
+}
+.btn-secondary:hover { background: var(--color-gray-50); border-color: var(--border-strong); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { background: var(--surface-overlay); color: var(--text-primary); }
+
+.btn-danger {
+  background: var(--color-error);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(217,48,37,.25);
+}
+.btn-danger:hover { background: #c1271d; }
+
+.btn-success {
+  background: var(--color-success);
+  color: #fff;
+}
+.btn-success:hover { background: #1a8a3e; }
+
+.btn-warning {
+  background: var(--color-warning);
+  color: #fff;
+}
+.btn-warning:hover { background: #d0730a; }
+
+.btn:disabled, .btn[disabled] {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   BADGES / TAGS
+══════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-mini);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+.badge-primary  { background: var(--color-primary-subtle); color: var(--color-primary); }
+.badge-blue     { background: var(--color-info-bg);    color: var(--color-info); }
+.badge-teal     { background: #d4f5f5; color: #1a8080; }
+.badge-green    { background: var(--color-success-bg); color: var(--color-success); }
+.badge-orange   { background: var(--color-warning-bg); color: #b86300; }
+.badge-red      { background: var(--color-error-bg);   color: var(--color-error); }
+.badge-gray     { background: var(--color-gray-100);   color: var(--text-tertiary); }
+.badge-outline  { background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary); }
+
+/* ══════════════════════════════════════
+   INPUTS
+══════════════════════════════════════ */
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-label {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+.input {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-small);
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 7px 11px;
+  width: 100%;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  outline: none;
+}
+.input:hover  { border-color: var(--border-strong); }
+.input:focus  { border-color: var(--color-accent-blue); box-shadow: 0 0 0 3px rgba(74,127,193,.15); }
+.input.error  { border-color: var(--color-error); box-shadow: 0 0 0 3px rgba(217,48,37,.1); }
+.input.success{ border-color: var(--color-success); box-shadow: 0 0 0 3px rgba(34,160,75,.1); }
+.input:disabled { background: var(--color-gray-50); opacity: var(--opacity-disabled); cursor: not-allowed; }
+.input-hint   { font-size: var(--font-size-mini); color: var(--text-tertiary); }
+.input-hint.error-hint { color: var(--color-error); }
+
+select.input { cursor: pointer; }
+
+/* ══════════════════════════════════════
+   TABELA
+══════════════════════════════════════ */
+.table-wrap {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-small);
+}
+.ds-table thead tr {
+  background: var(--color-gray-50);
+  border-bottom: 1px solid var(--border-light);
+}
+.ds-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: var(--font-size-mini);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ds-table tbody tr {
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--duration-fast);
+}
+.ds-table tbody tr:last-child { border-bottom: none; }
+.ds-table tbody tr:hover { background: var(--color-gray-50); }
+.ds-table tbody td { padding: 11px 14px; color: var(--text-primary); vertical-align: middle; }
+
+/* ══════════════════════════════════════
+   ALERTAS
+══════════════════════════════════════ */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  border-left: 3px solid;
+  font-size: var(--font-size-small);
+}
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-content {}
+.alert-title { font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+.alert-desc  { opacity: 0.8; line-height: var(--line-height-snug); }
+
+.alert-info    { background: var(--color-info-bg);    border-color: var(--color-info);    color: #1a4a80; }
+.alert-success { background: var(--color-success-bg); border-color: var(--color-success); color: #14532d; }
+.alert-warning { background: var(--color-warning-bg); border-color: var(--color-warning); color: #7c4700; }
+.alert-error   { background: var(--color-error-bg);   border-color: var(--color-error);   color: #7f1d1d; }
+
+/* ══════════════════════════════════════
+   AVATAR
+══════════════════════════════════════ */
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+}
+.avatar-xs  { width: 24px;  height: 24px;  font-size: 9px; }
+.avatar-sm  { width: 32px;  height: 32px;  font-size: 11px; }
+.avatar-md  { width: 40px;  height: 40px;  font-size: 14px; }
+.avatar-lg  { width: 48px;  height: 48px;  font-size: 16px; }
+.avatar-xl  { width: 64px;  height: 64px;  font-size: 20px; }
+.avatar-status {
+  position: relative;
+  display: inline-block;
+}
+.avatar-status::after {
+  content: '';
+  position: absolute;
+  bottom: 1px; right: 1px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: var(--color-success);
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR DEMO
+══════════════════════════════════════ */
+.sidebar-demo {
+  background: var(--color-primary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  width: 196px;
+  box-shadow: var(--shadow-lg);
+}
+.sidebar-demo-header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  display: flex; align-items: center; gap: 8px;
+}
+.sidebar-demo-header .logo-box {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,.15);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar-demo-header span {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: #fff;
+}
+.sidebar-demo-section {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  padding: 14px 14px 4px;
+}
+.sidebar-demo-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  font-size: var(--font-size-small);
+  color: rgba(255,255,255,.6);
+  cursor: pointer;
+}
+.sidebar-demo-item.active {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  font-weight: 500;
+}
+.sidebar-demo-item .item-icon {
+  width: 16px; height: 16px;
+  background: rgba(255,255,255,.15);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.sidebar-demo-item.active .item-icon { background: rgba(255,255,255,.3); }
+
+/* ══════════════════════════════════════
+   TOPBAR DEMO
+══════════════════════════════════════ */
+.topbar-demo {
+  background: var(--color-primary);
+  border-radius: var(--radius-xl);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-lg);
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-menu-icon { width: 20px; height: 20px; background: rgba(255,255,255,.2); border-radius: 4px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,.1);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  position: relative;
+}
+.topbar-badge {
+  position: absolute; top: -2px; right: -2px;
+  background: var(--color-error);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 0px 3px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-primary);
+  min-width: 14px;
+  text-align: center;
+}
+.topbar-toggle {
+  background: rgba(255,255,255,.12);
+  border-radius: var(--radius-full);
+  padding: 4px 5px;
+  display: flex;
+  gap: 3px;
+}
+.toggle-btn {
+  width: 28px; height: 22px;
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  color: rgba(255,255,255,.5);
+  cursor: pointer;
+}
+.toggle-btn.on { background: #fff; color: var(--color-primary); }
+
+/* ══════════════════════════════════════
+   DROPDOWN / SELECT DEMO
+══════════════════════════════════════ */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.filter-select {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-small);
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+  min-width: 130px;
+}
+.filter-divider { width: 1px; height: 24px; background: var(--border-light); }
+
+/* ══════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════ */
+.progress-row { display: flex; flex-direction: column; gap: 14px; }
+.progress-item { display: flex; flex-direction: column; gap: 5px; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; }
+.progress-label { font-size: var(--font-size-small); color: var(--text-secondary); font-weight: var(--font-weight-medium); }
+.progress-value { font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); }
+.progress-bar-wrap { height: 6px; background: var(--color-gray-200); border-radius: var(--radius-full); overflow: hidden; }
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out-expo);
+}
+
+/* ══════════════════════════════════════
+   TOKEN TABLE
+══════════════════════════════════════ */
+.token-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-small); }
+.token-table thead { background: var(--color-gray-50); }
+.token-table thead th { padding: 8px 14px; text-align: left; font-size: var(--font-size-mini); font-weight: var(--font-weight-semibold); color: var(--text-tertiary); letter-spacing: var(--letter-spacing-wide); text-transform: uppercase; border-bottom: 1px solid var(--doc-border); }
+.token-table tbody tr { border-bottom: 1px solid var(--doc-border); }
+.token-table tbody tr:last-child { border-bottom: none; }
+.token-table tbody tr:hover { background: var(--color-gray-50); }
+.token-table tbody td { padding: 8px 14px; }
+.token-name { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-accent-blue); }
+.token-value { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); }
+
+/* ══════════════════════════════════════
+   CODE BLOCK
+══════════════════════════════════════ */
+.code-block {
+  background: #1a2332;
+  color: #a8c8ef;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-mini);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  line-height: 1.7;
+  white-space: pre;
+}
+.code-inline {
+  background: var(--color-gray-100);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  padding: .1em .35em;
+  font-family: var(--font-mono);
+  font-size: .85em;
+  color: var(--color-primary);
+}
+
+/* ══════════════════════════════════════
+   CHART BAR DEMO
+══════════════════════════════════════ */
+.chart-demo {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-card);
+}
+.chart-title { font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); color: var(--text-primary); margin-bottom: 4px; }
+.chart-sub   { font-size: var(--font-size-mini); color: var(--text-tertiary); margin-bottom: 18px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.bar-label { font-size: var(--font-size-mini); color: var(--text-tertiary); width: 120px; text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 16px; background: var(--color-gray-100); border-radius: 3px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #3a5fa0 0%, #6b8fd4 100%); }
+.bar-count { font-size: var(--font-size-mini); color: var(--text-secondary); font-weight: 600; width: 30px; }
+
+/* ══════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-gray-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gray-400); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ════════════════ SIDEBAR ════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <polyline points="9,22 9,12 15,12 15,22" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>BIM Audit</h1>
+        <p>Design System v1.0</p>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-section">Fundação</div>
+      <a href="#colors" class="active">Cores <span class="dot"></span></a>
+      <a href="#typography">Tipografia</a>
+      <a href="#spacing">Espaçamento</a>
+      <a href="#tokens-all">Todos os Tokens</a>
+
+      <div class="nav-section">Componentes</div>
+      <a href="#layout">Layout</a>
+      <a href="#kpi-cards">KPI Cards</a>
+      <a href="#buttons">Botões</a>
+      <a href="#badges">Badges</a>
+      <a href="#inputs">Inputs</a>
+      <a href="#table">Tabela</a>
+      <a href="#alerts">Alertas</a>
+      <a href="#avatars">Avatares</a>
+      <a href="#charts">Gráficos</a>
+      <a href="#progress">Progresso</a>
+    </nav>
+  </aside>
+
+  <!-- ════════════════ CONTENT ════════════════ -->
+  <main class="content">
+
+    <!-- INTRO -->
+    <section id="intro" style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;background:var(--color-primary);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><polyline points="9,22 9,12 15,12 15,22" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="section-eyebrow" style="margin-bottom:2px;">audit-bimvercelapp.vercel.app</div>
+          <h1 style="font-size:var(--font-size-title1);font-weight:var(--font-weight-bold);letter-spacing:var(--letter-spacing-tight);line-height:1.1;">BIM Audit · Design System</h1>
+        </div>
+      </div>
+      <p style="font-size:var(--font-size-body);color:var(--text-tertiary);max-width:580px;line-height:var(--line-height-relaxed);">
+        Sistema de design completo da plataforma BIM Audit — tokens de cor, tipografia, espaçamento, componentes de interface e padrões de interação extraídos diretamente da aplicação.
+      </p>
+    </section>
+
+    <!-- ────────── CORES ────────── -->
+    <section id="colors">
+      <div class="section-eyebrow">Fundação</div>
+      <h2 class="section-title">Cores</h2>
+      <p class="section-desc">Paleta completa da interface. As cores primárias formam a estrutura (sidebar, topbar), enquanto as cores semânticas comunicam estado e urgência nos KPIs e alertas.</p>
+
+      <h3 style="font-size:var(--font-size-body);font-weight:var(--font-weight-semibold);color:var(--text-primary);margin-bottom:12px;">Primárias</h3>
+      <div class="color-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:32px;">
+        <div class="color-swatch"><div class="swatch-color" style="background:#1e3a5f;"></div><div class="swatch-info"><span class="swatch-name">Primary</span><span class="swatch-hex">#1e3a5f</span><span class="swatch-var">--color-primary</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#16304f;"></div><div class="swatch-info"><span class="swatch-name">Primary Hover</span><span class="swatch-hex">#16304f</span><span class="swatch-var">--color-primary-hover</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#2a4f7a;"></div><div class="swatch-info"><span class="swatch-name">Primary Light</span><span class="swatch-hex">#2a4f7a</span><span class="swatch-var">--color-primary-light</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#e8eef5;"></div><div class="swatch-info"><span class="swatch-name">Primary Subtle</span><span class="swatch-hex">#e8eef5</span><span class="swatch-var">--color-primary-subtle</span></div></div>
+      </div>
+
+      <h3 style="font-size:var(--font-size-body);font-weight:var(--font-weight-semibold);color:var(--text-primary);margin-bottom:12px;">Acento & Semânticas</h3>
+      <div class="color-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:32px;">
+        <div class="color-swatch"><div class="swatch-color" style="background:#4a7fc1;"></div><div class="swatch-info"><span class="swatch-name">Accent Blue</span><span class="swatch-hex">#4a7fc1</span><span class="swatch-var">--color-accent-blue</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#2ea8a8;"></div><div class="swatch-info"><span class="swatch-name">Teal</span><span class="swatch-hex">#2ea8a8</span><span class="swatch-var">--color-accent-teal</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#22a04b;"></div><div class="swatch-info"><span class="swatch-name">Green / Success</span><span class="swatch-hex">#22a04b</span><span class="swatch-var">--color-accent-green</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#e8820c;"></div><div class="swatch-info"><span class="swatch-name">Orange / Warning</span><span class="swatch-hex">#e8820c</span><span class="swatch-var">--color-accent-orange</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#d93025;"></div><div class="swatch-info"><span class="swatch-name">Red / Error</span><span class="swatch-hex">#d93025</span><span class="swatch-var">--color-accent-red</span></div></div>
+      </div>
+
+      <h3 style="font-size:var(--font-size-body);font-weight:var(--font-weight-semibold);color:var(--text-primary);margin-bottom:12px;">Neutras</h3>
+      <div class="color-grid" style="grid-template-columns:repeat(9,1fr);margin-bottom:0;">
+        <div class="color-swatch"><div class="swatch-color" style="background:#f8f9fa;border:1px solid #e9ecef;"></div><div class="swatch-info"><span class="swatch-name">50</span><span class="swatch-hex">#f8f9fa</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#f1f3f5;"></div><div class="swatch-info"><span class="swatch-name">100</span><span class="swatch-hex">#f1f3f5</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#e9ecef;"></div><div class="swatch-info"><span class="swatch-name">200</span><span class="swatch-hex">#e9ecef</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#dee2e6;"></div><div class="swatch-info"><span class="swatch-name">300</span><span class="swatch-hex">#dee2e6</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#adb5bd;"></div><div class="swatch-info"><span class="swatch-name">500</span><span class="swatch-hex">#adb5bd</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#6c757d;"></div><div class="swatch-info"><span class="swatch-name">600</span><span class="swatch-hex">#6c757d</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#495057;"></div><div class="swatch-info"><span class="swatch-name">700</span><span class="swatch-hex">#495057</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#343a40;"></div><div class="swatch-info"><span class="swatch-name">800</span><span class="swatch-hex">#343a40</span></div></div>
+        <div class="color-swatch"><div class="swatch-color" style="background:#212529;"></div><div class="swatch-info"><span class="swatch-name">900</span><span class="swatch-hex">#212529</span></div></div>
+      </div>
+    </section>
+
+    <!-- ────────── TIPOGRAFIA ────────── -->
+    <section id="typography">
+      <div class="section-eyebrow">Fundação</div>
+      <h2 class="section-title">Tipografia</h2>
+      <p class="section-desc">DM Sans como fonte principal — moderna, geométrica e altamente legível em dashboards densos. DM Mono para código, valores e identificadores.</p>
+
+      <div class="card-demo">
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-display);font-weight:var(--font-weight-bold);letter-spacing:var(--letter-spacing-tight);line-height:var(--line-height-tight);">2.795</div>
+          <div class="type-meta"><span>Display · 44px</span><span>Bold 700</span><span>tracking -0.02em</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-title1);font-weight:var(--font-weight-bold);letter-spacing:var(--letter-spacing-tight);">152 Auditorias</div>
+          <div class="type-meta"><span>Title 1 · 32px</span><span>Bold 700</span><span>tracking -0.02em</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-title2);font-weight:var(--font-weight-semibold);letter-spacing:var(--letter-spacing-tight);">Dashboard</div>
+          <div class="type-meta"><span>Title 2 · 24px</span><span>SemiBold 600</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-title3);font-weight:var(--font-weight-semibold);">Piores disciplinas</div>
+          <div class="type-meta"><span>Title 3 · 20px</span><span>SemiBold 600</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-body);font-weight:var(--font-weight-normal);">Ranking pelo número total de erros encontrados</div>
+          <div class="type-meta"><span>Body · 15px</span><span>Normal 400</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-small);color:var(--text-secondary);">Auditorias feitas · Sincronizado com o sistema</div>
+          <div class="type-meta"><span>Small · 13px</span><span>Normal 400</span></div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Ver auditorias → · Seção: Climatização e Exaustão</div>
+          <div class="type-meta"><span>Mini · 12px</span><span>Normal 400</span></div>
+        </div>
+        <div class="type-sample" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+          <div style="font-size:var(--font-size-mini);font-weight:700;letter-spacing:var(--letter-spacing-wider);text-transform:uppercase;color:var(--text-tertiary);">PRINCIPAL · CADASTROS</div>
+          <div class="type-meta"><span>Label Nav · 10px</span><span>Bold 700</span><span>tracking 0.08em · uppercase</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <h3 style="font-size:var(--font-size-small);font-weight:var(--font-weight-semibold);margin-bottom:10px;color:var(--text-secondary);">Fonte Mono</h3>
+        <div class="code-block">/* DM Mono — valores, IDs, código */
+font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+
+/* Uso típico */
+.kpi-value   { font-family: var(--font-sans);  /* números de KPI usam DM Sans bold */ }
+.token-name  { font-family: var(--font-mono);  /* nomes de token e código */ }
+.badge-id    { font-family: var(--font-mono);  /* identificadores curtos */ }</div>
+      </div>
+    </section>
+
+    <!-- ────────── ESPAÇAMENTO ────────── -->
+    <section id="spacing">
+      <div class="section-eyebrow">Fundação</div>
+      <h2 class="section-title">Espaçamento</h2>
+      <p class="section-desc">Escala de 4px. Todos os paddings, gaps e margens usam múltiplos de 4.</p>
+      <div class="card-demo">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:16px;" id="space-row-1">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-1</span>
+            <div style="height:16px;background:var(--color-primary);width:4px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">4px — gap mínimo, ícone+texto</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-2</span>
+            <div style="height:16px;background:var(--color-primary);width:8px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">8px — gap entre elementos</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-3</span>
+            <div style="height:16px;background:var(--color-primary);width:12px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">12px — gap interno de botão</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-4</span>
+            <div style="height:16px;background:var(--color-primary);width:16px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">16px — padding padrão</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-5</span>
+            <div style="height:16px;background:var(--color-primary);width:20px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">20px — padding de card (vertical)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-6</span>
+            <div style="height:16px;background:var(--color-primary);width:24px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">24px — padding de card (horizontal)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-8</span>
+            <div style="height:16px;background:var(--color-primary);width:32px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">32px — gap entre seções</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--color-accent-blue);width:100px;">--space-12</span>
+            <div style="height:16px;background:var(--color-primary);width:48px;border-radius:2px;"></div>
+            <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);">48px — espaço entre seções grandes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── LAYOUT ────────── -->
+    <section id="layout">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Layout</h2>
+      <p class="section-desc">A estrutura base da aplicação: sidebar fixa (196px) em azul marinho + topbar + área de conteúdo com fundo cinza-claro.</p>
+
+      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+        <!-- Sidebar demo -->
+        <div>
+          <p style="font-size:var(--font-size-mini);font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Sidebar — 196px</p>
+          <div class="sidebar-demo">
+            <div class="sidebar-demo-header">
+              <div class="logo-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#fff" stroke-width="2.5"/></svg>
+              </div>
+              <span>BIM Audit</span>
+            </div>
+            <div class="sidebar-demo-section">Principal</div>
+            <div class="sidebar-demo-item active"><div class="item-icon"></div> Dashboard</div>
+            <div class="sidebar-demo-item"><div class="item-icon"></div> Auditorias</div>
+            <div class="sidebar-demo-item"><div class="item-icon"></div> Relatórios</div>
+            <div class="sidebar-demo-section">Cadastros</div>
+            <div class="sidebar-demo-item"><div class="item-icon"></div> Obras</div>
+            <div class="sidebar-demo-item"><div class="item-icon"></div> Biblioteca</div>
+          </div>
+        </div>
+
+        <!-- Topbar demo -->
+        <div style="flex:1;min-width:320px;">
+          <p style="font-size:var(--font-size-mini);font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Topbar — 56px height</p>
+          <div class="topbar-demo">
+            <div class="topbar-left">
+              <div class="topbar-menu-icon"></div>
+            </div>
+            <div class="topbar-right">
+              <div class="topbar-icon-btn">
+                🔔
+                <span class="topbar-badge">37</span>
+              </div>
+              <div class="topbar-toggle">
+                <div class="toggle-btn on">☀️</div>
+                <div class="toggle-btn">🌙</div>
+              </div>
+              <div class="topbar-icon-btn">⚙️</div>
+              <div class="topbar-icon-btn">👤</div>
+              <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);font-size:var(--font-size-small);">↪ Sair</button>
+            </div>
+          </div>
+
+          <p style="font-size:var(--font-size-mini);font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;">Filter Bar</p>
+          <div class="filter-bar">
+            <select class="filter-select"><option>Obras</option><option>Obra A</option><option>Obra B</option></select>
+            <div class="filter-divider"></div>
+            <select class="filter-select" style="min-width:180px;"><option>dd/mm/aaaa — dd/mm/aaaa</option></select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── KPI CARDS ────────── -->
+    <section id="kpi-cards">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">KPI Cards</h2>
+      <p class="section-desc">Cards de métricas do dashboard. Cada card tem uma borda colorida no topo que comunica sua categoria semântica. Ícone, valor em destaque e informação contextual.</p>
+
+      <div class="grid-4" style="margin-bottom:20px;">
+        <!-- Card 1: Auditorias feitas -->
+        <div class="kpi-card dark">
+          <div class="kpi-header">
+            <span class="kpi-label">Auditorias feitas</span>
+            <div class="kpi-icon dark-icon">✓</div>
+          </div>
+          <div class="kpi-value dark">152</div>
+          <a class="kpi-link" href="#">Ver auditorias →</a>
+        </div>
+
+        <!-- Card 2: Total de itens -->
+        <div class="kpi-card teal">
+          <div class="kpi-header">
+            <span class="kpi-label">Total de itens no sistema</span>
+            <div class="kpi-icon teal-icon">⬡</div>
+          </div>
+          <div class="kpi-value teal">2.795</div>
+          <div class="kpi-sub">Sincronizado com o sistema</div>
+        </div>
+
+        <!-- Card 3: Próxima auditoria -->
+        <div class="kpi-card orange">
+          <div class="kpi-header">
+            <span class="kpi-label">Próxima data de auditoria</span>
+            <div class="kpi-icon orange-icon">📅</div>
+          </div>
+          <div class="kpi-value orange" style="font-size:1.25rem;line-height:1.3;">16 de mar. de 2026</div>
+          <div class="kpi-sub">Seção: Climatização e Exaustão</div>
+        </div>
+
+        <!-- Card 4: Taxa de conformidade -->
+        <div class="kpi-card green">
+          <div class="kpi-header">
+            <span class="kpi-label">Taxa de Conformidade Geral</span>
+            <div class="kpi-icon green-icon">✓</div>
+          </div>
+          <div class="kpi-value green">62%</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:62%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: Pendências -->
+      <div class="grid-4">
+        <div class="kpi-card red">
+          <div class="kpi-header">
+            <span class="kpi-label">Itens Pendentes de Resolução</span>
+            <div class="kpi-icon red-icon">⏱</div>
+          </div>
+          <div class="kpi-value red">434</div>
+          <div class="kpi-sub">Aguardando ação</div>
+        </div>
+        <div style="grid-column:span 3;background:var(--color-gray-50);border:1px dashed var(--border-medium);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;padding:16px;">
+          <span style="font-size:var(--font-size-small);color:var(--text-disabled);">+ outros cards conforme necessidade</span>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="code-block">/* Anatomia do KPI Card */
+.kpi-card {
+  border-top: 3px solid [cor-semântica];   /* borda colorida de identidade */
+  padding: 18px 20px 16px;
+}
+
+/* Variantes de borda superior */
+.kpi-card.dark   { border-color: #2c3e50; }   /* auditorias (neutro) */
+.kpi-card.teal   { border-color: #2ea8a8; }   /* total / sincronizado */
+.kpi-card.orange { border-color: #e8820c; }   /* data / alerta */
+.kpi-card.green  { border-color: #22a04b; }   /* conformidade / ok */
+.kpi-card.red    { border-color: #d93025; }   /* pendências / erro */</div>
+      </div>
+    </section>
+
+    <!-- ────────── BOTÕES ────────── -->
+    <section id="buttons">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Botões</h2>
+      <p class="section-desc">Sistema de botões com variantes semânticas e 4 tamanhos. O Primary usa o azul marinho da marca, alinhado com a sidebar.</p>
+
+      <div class="card-demo" style="display:flex;flex-direction:column;gap:20px;">
+        <div>
+          <p style="font-size:var(--font-size-mini);color:var(--text-tertiary);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Variantes</p>
+          <div class="component-row">
+            <button class="btn btn-primary btn-md">Primary</button>
+            <button class="btn btn-accent btn-md">Accent Blue</button>
+            <button class="btn btn-secondary btn-md">Secondary</button>
+            <button class="btn btn-ghost btn-md">Ghost</button>
+            <button class="btn btn-success btn-md">Success</button>
+            <button class="btn btn-warning btn-md">Warning</button>
+            <button class="btn btn-danger btn-md">Danger</button>
+            <button class="btn btn-primary btn-md" disabled>Disabled</button>
+          </div>
+        </div>
+        <hr class="section-divider" style="margin:4px 0;">
+        <div>
+          <p style="font-size:var(--font-size-mini);color:var(--text-tertiary);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Tamanhos</p>
+          <div class="component-row" style="align-items:center;">
+            <button class="btn btn-primary btn-xs">Extra Small</button>
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-md">Medium</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+          </div>
+        </div>
+        <hr class="section-divider" style="margin:4px 0;">
+        <div>
+          <p style="font-size:var(--font-size-mini);color:var(--text-tertiary);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Com Ícones</p>
+          <div class="component-row">
+            <button class="btn btn-primary btn-md">＋ Nova Auditoria</button>
+            <button class="btn btn-secondary btn-md">⬇ Exportar</button>
+            <button class="btn btn-ghost btn-md">✏ Editar</button>
+            <button class="btn btn-danger btn-sm">🗑 Excluir</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── BADGES ────────── -->
+    <section id="badges">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Badges & Tags</h2>
+      <p class="section-desc">Usados para status, categorias de disciplina, tipos de não-conformidade e prioridades nas auditorias.</p>
+
+      <div class="card-demo">
+        <div class="component-row" style="margin-bottom:16px;">
+          <span class="badge badge-primary"><span class="badge-dot" style="background:var(--color-primary);"></span>BIM</span>
+          <span class="badge badge-blue"><span class="badge-dot" style="background:var(--color-info);"></span>Arquitetura</span>
+          <span class="badge badge-teal"><span class="badge-dot" style="background:#1a8080;"></span>Elétrico</span>
+          <span class="badge badge-green"><span class="badge-dot" style="background:var(--color-success);"></span>Conforme</span>
+          <span class="badge badge-orange"><span class="badge-dot" style="background:#b86300;"></span>Pendente</span>
+          <span class="badge badge-red"><span class="badge-dot" style="background:var(--color-error);"></span>Não Conforme</span>
+          <span class="badge badge-gray"><span class="badge-dot" style="background:var(--color-gray-500);"></span>Inativo</span>
+          <span class="badge badge-outline">Outline</span>
+        </div>
+        <div class="component-row">
+          <span class="badge badge-blue">Esgoto Sanitário</span>
+          <span class="badge badge-teal">Gás</span>
+          <span class="badge badge-primary">Elétrico – Sistemas</span>
+          <span class="badge badge-orange">Alta Prioridade</span>
+          <span class="badge badge-red">Crítico</span>
+          <span class="badge badge-green">Resolvido</span>
+          <span class="badge badge-gray">Rascunho</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── INPUTS ────────── -->
+    <section id="inputs">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Inputs & Formulários</h2>
+      <p class="section-desc">Campos de texto, selects e estados de validação usados em filtros, modais e formulários de cadastro.</p>
+
+      <div class="card-demo">
+        <div class="grid-2" style="gap:20px;">
+          <div class="input-group">
+            <label class="input-label">Nome da obra</label>
+            <input class="input" type="text" placeholder="Ex: Edifício Central Tower">
+            <span class="input-hint">Nome único para identificação</span>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Disciplina</label>
+            <select class="input">
+              <option>Selecione...</option>
+              <option>Arquitetura</option>
+              <option>Elétrico</option>
+              <option>Hidráulico</option>
+              <option>Climatização</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Data da auditoria</label>
+            <input class="input" type="date">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Status — Sucesso</label>
+            <input class="input success" type="text" value="Climatização e Exaustão">
+            <span class="input-hint" style="color:var(--color-success);">✓ Seção encontrada</span>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Campo — Erro</label>
+            <input class="input error" type="text" value="data inválida">
+            <span class="input-hint error-hint">⚠ Formato de data inválido</span>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Campo desabilitado</label>
+            <input class="input" type="text" value="Somente leitura" disabled>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── TABELA ────────── -->
+    <section id="table">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Tabela</h2>
+      <p class="section-desc">Tabelas de listagem usadas em Auditorias, Relatórios e Cadastros. Linhas com hover sutil e badges de status inline.</p>
+
+      <div class="table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr>
+              <th>Auditoria</th>
+              <th>Obra</th>
+              <th>Disciplina</th>
+              <th>Conformidade</th>
+              <th>Status</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:var(--font-weight-medium);">AUD-001</td>
+              <td>Torre Central</td>
+              <td><span class="badge badge-blue">Arquitetura</span></td>
+              <td><span style="color:var(--color-accent-green);font-weight:600;">87%</span></td>
+              <td><span class="badge badge-green">Conforme</span></td>
+              <td style="color:var(--text-tertiary);">10 mar. 2026</td>
+            </tr>
+            <tr>
+              <td style="font-weight:var(--font-weight-medium);">AUD-002</td>
+              <td>Residencial Parque</td>
+              <td><span class="badge badge-teal">Elétrico</span></td>
+              <td><span style="color:var(--color-accent-orange);font-weight:600;">62%</span></td>
+              <td><span class="badge badge-orange">Pendente</span></td>
+              <td style="color:var(--text-tertiary);">08 mar. 2026</td>
+            </tr>
+            <tr>
+              <td style="font-weight:var(--font-weight-medium);">AUD-003</td>
+              <td>Complexo Sul</td>
+              <td><span class="badge badge-primary">Hidráulico</span></td>
+              <td><span style="color:var(--color-accent-red);font-weight:600;">34%</span></td>
+              <td><span class="badge badge-red">Não Conforme</span></td>
+              <td style="color:var(--text-tertiary);">05 mar. 2026</td>
+            </tr>
+            <tr>
+              <td style="font-weight:var(--font-weight-medium);">AUD-004</td>
+              <td>Galpão Industrial</td>
+              <td><span class="badge badge-orange">Climatização</span></td>
+              <td><span style="color:var(--color-accent-green);font-weight:600;">91%</span></td>
+              <td><span class="badge badge-green">Conforme</span></td>
+              <td style="color:var(--text-tertiary);">01 mar. 2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ────────── ALERTAS ────────── -->
+    <section id="alerts">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Alertas</h2>
+      <p class="section-desc">Mensagens de feedback para ações do sistema, validações e avisos de conformidade.</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="alert alert-info">
+          <span class="alert-icon">ℹ️</span>
+          <div class="alert-content">
+            <div class="alert-title">Sincronização ativa</div>
+            <div class="alert-desc">Os dados foram sincronizados com o sistema BIM às 10:32.</div>
+          </div>
+        </div>
+        <div class="alert alert-success">
+          <span class="alert-icon">✅</span>
+          <div class="alert-content">
+            <div class="alert-title">Auditoria concluída</div>
+            <div class="alert-desc">AUD-001 foi finalizada com 87% de conformidade geral.</div>
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <span class="alert-icon">⚠️</span>
+          <div class="alert-content">
+            <div class="alert-title">Próxima auditoria em 5 dias</div>
+            <div class="alert-desc">Seção de Climatização e Exaustão vence em 16 de março de 2026.</div>
+          </div>
+        </div>
+        <div class="alert alert-error">
+          <span class="alert-icon">🚫</span>
+          <div class="alert-content">
+            <div class="alert-title">434 itens pendentes</div>
+            <div class="alert-desc">Existem itens críticos aguardando resolução. Ação necessária.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── AVATARES ────────── -->
+    <section id="avatars">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Avatares</h2>
+      <p class="section-desc">Usados na topbar, listas de usuários e atribuição de responsáveis em auditorias.</p>
+
+      <div class="card-demo">
+        <div class="component-row" style="margin-bottom:20px;">
+          <span class="avatar avatar-xs">AB</span>
+          <span class="avatar avatar-sm">RS</span>
+          <span class="avatar avatar-md">JF</span>
+          <span class="avatar avatar-lg">MP</span>
+          <span class="avatar avatar-xl">CA</span>
+        </div>
+        <div class="component-row">
+          <div class="avatar-status"><span class="avatar avatar-md" style="background:var(--color-primary);color:#fff;">JF</span></div>
+          <div class="avatar-status"><span class="avatar avatar-md" style="background:#2ea8a8;color:#fff;">RS</span></div>
+          <div class="avatar-status" style="--dot-color:#e8820c"><span class="avatar avatar-md" style="background:var(--color-accent-orange);color:#fff;">MP</span></div>
+          <span style="font-size:var(--font-size-mini);color:var(--text-tertiary);margin-left:8px;">● Online indicator (dot verde)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── GRÁFICOS ────────── -->
+    <section id="charts">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Gráficos</h2>
+      <p class="section-desc">Padrão visual dos gráficos de barra horizontal (Piores Disciplinas) e barra vertical (Erros por Categoria). Gradiente azul — do primário ao azul claro.</p>
+
+      <div class="grid-2">
+        <div class="chart-demo">
+          <div class="chart-title">Piores disciplinas</div>
+          <div class="chart-sub">Ranking pelo número total de erros encontrados</div>
+          <div class="bar-row"><div class="bar-label">Arquitetura</div><div class="bar-track"><div class="bar-fill" style="width:95%;"></div></div><div class="bar-count">120</div></div>
+          <div class="bar-row"><div class="bar-label">Esgoto Sanitário</div><div class="bar-track"><div class="bar-fill" style="width:55%;"></div></div><div class="bar-count">69</div></div>
+          <div class="bar-row"><div class="bar-label">Gás</div><div class="bar-track"><div class="bar-fill" style="width:52%;"></div></div><div class="bar-count">66</div></div>
+          <div class="bar-row"><div class="bar-label">Elétrico – Sistemas</div><div class="bar-track"><div class="bar-fill" style="width:47%;"></div></div><div class="bar-count">59</div></div>
+          <div class="bar-row"><div class="bar-label">Elétrico</div><div class="bar-track"><div class="bar-fill" style="width:45%;"></div></div><div class="bar-count">57</div></div>
+        </div>
+
+        <div class="chart-demo">
+          <div class="chart-title">Paleta dos Gráficos</div>
+          <div class="chart-sub">Gradiente e variações de azul</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:20px;background:linear-gradient(90deg,#3a5fa0,#6b8fd4);border-radius:3px;"></div><span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--text-secondary);">#3a5fa0 → #6b8fd4 — barra principal</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:20px;background:#22a04b;border-radius:3px;"></div><span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--text-secondary);">#22a04b — progresso verde</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:20px;background:#e8820c;border-radius:3px;"></div><span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--text-secondary);">#e8820c — destaque laranja</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:20px;background:#d93025;border-radius:3px;"></div><span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--text-secondary);">#d93025 — pendências / erro</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><div style="width:40px;height:20px;background:#e9ecef;border-radius:3px;border:1px solid #dee2e6;"></div><span style="font-family:var(--font-mono);font-size:var(--font-size-mini);color:var(--text-secondary);">#e9ecef — fundo de barra/track</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── PROGRESSO ────────── -->
+    <section id="progress">
+      <div class="section-eyebrow">Componentes</div>
+      <h2 class="section-title">Progresso</h2>
+      <p class="section-desc">Barras de progresso usadas nos KPI Cards de conformidade e em listagens de auditoria por disciplina.</p>
+
+      <div class="card-demo">
+        <div class="progress-row">
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Conformidade Geral</span>
+              <span class="progress-value" style="color:var(--color-accent-green);">62%</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:62%;background:var(--color-accent-green);"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Arquitetura</span>
+              <span class="progress-value" style="color:var(--color-accent-orange);">45%</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:45%;background:var(--color-accent-orange);"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Elétrico</span>
+              <span class="progress-value" style="color:var(--color-accent-blue);">78%</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:78%;background:var(--color-accent-blue);"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Climatização</span>
+              <span class="progress-value" style="color:var(--color-accent-red);">28%</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:28%;background:var(--color-accent-red);"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Hidráulico</span>
+              <span class="progress-value" style="color:var(--color-accent-green);">91%</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:91%;background:var(--color-accent-green);"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────── TOKENS ────────── -->
+    <section id="tokens-all">
+      <div class="section-eyebrow">Referência</div>
+      <h2 class="section-title">Todos os Tokens CSS</h2>
+      <p class="section-desc">Referência completa dos design tokens definidos em <code class="code-inline">:root</code>. Cole no seu projeto global de CSS ou <code class="code-inline">globals.css</code>.</p>
+
+      <div class="table-wrap">
+        <table class="token-table">
+          <thead><tr><th>Token</th><th>Valor</th><th>Categoria</th></tr></thead>
+          <tbody>
+            <tr><td class="token-name">--font-sans</td><td class="token-value">"DM Sans", system-ui</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--font-mono</td><td class="token-value">"DM Mono", monospace</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--font-size-mini</td><td class="token-value">0.75rem (12px)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--font-size-small</td><td class="token-value">0.8125rem (13px)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--font-size-body</td><td class="token-value">0.9375rem (15px)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--font-size-title1</td><td class="token-value">2rem (32px)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Tipografia</td></tr>
+            <tr><td class="token-name">--color-primary</td><td class="token-value">#1e3a5f</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--color-accent-blue</td><td class="token-value">#4a7fc1</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--color-accent-teal</td><td class="token-value">#2ea8a8</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--color-accent-green</td><td class="token-value">#22a04b</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--color-accent-orange</td><td class="token-value">#e8820c</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--color-accent-red</td><td class="token-value">#d93025</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Cores</td></tr>
+            <tr><td class="token-name">--surface-sidebar</td><td class="token-value">#1e3a5f</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Superfícies</td></tr>
+            <tr><td class="token-name">--surface-base</td><td class="token-value">#f4f6f8</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Superfícies</td></tr>
+            <tr><td class="token-name">--surface-card</td><td class="token-value">#ffffff</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Superfícies</td></tr>
+            <tr><td class="token-name">--border-light</td><td class="token-value">#e9ecef</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Bordas</td></tr>
+            <tr><td class="token-name">--shadow-card</td><td class="token-value">0 1px 3px rgba(0,0,0,.06)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Sombras</td></tr>
+            <tr><td class="token-name">--radius-sm</td><td class="token-value">4px</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Radius</td></tr>
+            <tr><td class="token-name">--radius-md</td><td class="token-value">6px</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Radius</td></tr>
+            <tr><td class="token-name">--radius-lg</td><td class="token-value">8px</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Radius</td></tr>
+            <tr><td class="token-name">--sidebar-width</td><td class="token-value">196px</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Layout</td></tr>
+            <tr><td class="token-name">--topbar-height</td><td class="token-value">56px</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Layout</td></tr>
+            <tr><td class="token-name">--duration-fast</td><td class="token-value">100ms</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Animação</td></tr>
+            <tr><td class="token-name">--duration-normal</td><td class="token-value">200ms</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Animação</td></tr>
+            <tr><td class="token-name">--ease-out-cubic</td><td class="token-value">cubic-bezier(.215,.61,.355,1)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Easing</td></tr>
+            <tr><td class="token-name">--ease-spring</td><td class="token-value">cubic-bezier(.34,1.56,.64,1)</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Easing</td></tr>
+            <tr><td class="token-name">--z-dropdown</td><td class="token-value">100</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Z-Index</td></tr>
+            <tr><td class="token-name">--z-modal</td><td class="token-value">400</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Z-Index</td></tr>
+            <tr><td class="token-name">--opacity-disabled</td><td class="token-value">0.4</td><td style="font-size:var(--font-size-mini);color:var(--text-tertiary);">Opacidades</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.sidebar nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>

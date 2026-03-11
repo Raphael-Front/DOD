@@ -1,0 +1,32 @@
+// Prisma schema para Diário de Obra GPL
+// Compatível com Supabase PostgreSQL
+// Para schema completo, use o schema_diario_obra_gpl.sql via Supabase migrations
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model DimObra {
+  id                String   @id @default(uuid()) @db.Uuid
+  @@map("dim_obras")
+  nome              String
+  endereco          String?
+  cidade            String?
+  estado            String?  @db.Char(2)
+  cep               String?
+  responsavelTecnico String? @map("responsavel_tecnico")
+  dataInicio        DateTime? @map("data_inicio") @db.Date
+  dataPrevistaFim   DateTime? @map("data_prevista_fim") @db.Date
+  dataRealFim       DateTime? @map("data_real_fim") @db.Date
+  status            String   @default("em_andamento")
+  observacoes       String?
+  ativo             Boolean  @default(true)
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @default(now()) @updatedAt @map("atualizado_em")
+}
