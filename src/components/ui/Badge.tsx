@@ -1,61 +1,53 @@
-"use client";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "radix-ui"
 
-import { type HTMLAttributes } from "react";
-import { clsx } from "clsx";
+import { cn } from "@/lib/utils"
 
-export type BadgeVariant =
-  | "primary"
-  | "blue"
-  | "teal"
-  | "green"
-  | "orange"
-  | "red"
-  | "gray"
-  | "outline";
+const badgeVariants = cva(
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-semibold whitespace-nowrap [&>svg]:pointer-events-none [&>svg]:size-3",
+  {
+    variants: {
+      variant: {
+        default: "bg-[var(--color-primary-subtle)] text-[var(--color-primary)]",
+        primary: "bg-[var(--color-primary-subtle)] text-[var(--color-primary)]",
+        blue: "bg-[var(--color-info-bg)] text-[var(--color-info)]",
+        teal: "bg-[#d4f5f5] text-[#1a8080]",
+        green: "bg-[var(--color-success-bg)] text-[var(--color-success)]",
+        orange: "bg-[var(--color-warning-bg)] text-[#b86300]",
+        red: "bg-[var(--color-error-bg)] text-[var(--color-error)]",
+        secondary: "bg-secondary text-secondary-foreground",
+        destructive: "bg-[var(--color-error-bg)] text-[var(--color-error)]",
+        gray: "bg-[var(--color-gray-100)] text-[var(--text-tertiary)]",
+        outline:
+          "border-[var(--border-medium)] bg-transparent text-[var(--text-secondary)]",
+        ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 [a&]:hover:underline",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: BadgeVariant;
-  dot?: boolean;
-}
-
-const variantClasses: Record<BadgeVariant, string> = {
-  primary:
-    "bg-[var(--color-primary-subtle)] text-[var(--color-primary)] [&_.badge-dot]:bg-[var(--color-primary)]",
-  blue:
-    "bg-[var(--color-info-bg)] text-[var(--color-info)] [&_.badge-dot]:bg-[var(--color-info)]",
-  teal:
-    "bg-[var(--badge-teal-bg)] text-[var(--badge-teal-text)] [&_.badge-dot]:bg-[var(--badge-teal-text)]",
-  green:
-    "bg-[var(--color-success-bg)] text-[var(--color-success)] [&_.badge-dot]:bg-[var(--color-success)]",
-  orange:
-    "bg-[var(--color-warning-bg)] text-[var(--badge-orange-text)] [&_.badge-dot]:bg-[var(--badge-orange-text)]",
-  red:
-    "bg-[var(--color-error-bg)] text-[var(--color-error)] [&_.badge-dot]:bg-[var(--color-error)]",
-  gray:
-    "bg-[var(--color-gray-100)] text-[var(--text-tertiary)] [&_.badge-dot]:bg-[var(--color-gray-500)]",
-  outline:
-    "bg-transparent border border-[var(--border-medium)] text-[var(--text-secondary)]",
-};
-
-export function Badge({
-  variant = "primary",
-  dot = false,
+function Badge({
   className,
-  children,
+  variant = "default",
+  asChild = false,
   ...props
-}: BadgeProps) {
+}: React.ComponentProps<"span"> &
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : "span"
+
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center gap-1 text-[11px] font-semibold rounded-[20px] whitespace-nowrap",
-        variantClasses[variant],
-        className
-      )}
-      style={{ padding: "4px 10px" }}
+    <Comp
+      data-slot="badge"
+      data-variant={variant}
+      className={cn(badgeVariants({ variant }), className)}
       {...props}
-    >
-      {dot && <span className="badge-dot w-1.5 h-1.5 rounded-full shrink-0" />}
-      {children}
-    </span>
-  );
+    />
+  )
 }
+
+export { Badge, badgeVariants }

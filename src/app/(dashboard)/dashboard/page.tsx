@@ -95,7 +95,7 @@ export default function DashboardPage() {
   const nomeUsuario = profile?.nome ?? "usuário";
 
   return (
-    <div className="flex flex-col gap-7 min-h-full">
+    <div className="flex flex-col gap-8 min-h-full">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-1">
         <div>
           <h1 className="page-title">
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard
           variant="dark"
           label="Total de Funcionários"

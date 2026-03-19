@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-import { DM_Sans, DM_Serif_Display } from "next/font/google";
+import { DM_Sans, DM_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
@@ -13,10 +13,16 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-const dmSerifDisplay = DM_Serif_Display({
+const dmMono = DM_Mono({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-dm-serif-display",
+  weight: ["400", "500"],
+  variable: "--font-dm-mono",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sora",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${dmSans.variable} ${dmSerifDisplay.variable}`}>
+    <html lang="pt-BR" data-theme="light" suppressHydrationWarning className={`${dmSans.variable} ${dmMono.variable} ${sora.variable}`}>
       <body className="antialiased min-h-screen">
         <Providers>
           <ProtectedRoute>

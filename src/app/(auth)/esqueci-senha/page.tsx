@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, ArrowLeft } from "lucide-react";
+import { Button, Alert, AlertTitle, AlertDescription } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
 export default function EsqueciSenhaPage() {
@@ -19,7 +20,7 @@ export default function EsqueciSenhaPage() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/login`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`,
       });
 
       if (error) {
@@ -54,9 +55,10 @@ export default function EsqueciSenhaPage() {
         </p>
 
         {sent ? (
-          <div className="p-4 bg-[var(--color-success-bg)] text-[var(--alert-success-text)] rounded-[var(--radius-lg)]">
-            E-mail enviado! Verifique sua caixa de entrada.
-          </div>
+          <Alert variant="success">
+            <AlertTitle>E-mail enviado</AlertTitle>
+            <AlertDescription>Verifique sua caixa de entrada.</AlertDescription>
+          </Alert>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -77,18 +79,15 @@ export default function EsqueciSenhaPage() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-[var(--radius-lg)] bg-[var(--color-error-bg)] text-[var(--alert-error-text)] text-[var(--font-size-small)]">
-                {error}
-              </div>
+              <Alert variant="error">
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-[var(--color-primary)] text-white rounded-[var(--radius-lg)] font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-[var(--opacity-disabled)]"
-            >
+            <Button type="submit" disabled={loading} className="w-full h-12">
               {loading ? "Enviando…" : "Enviar link"}
-            </button>
+            </Button>
           </form>
         )}
       </div>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Alert } from "@/components/ui";
+import { Alert, AlertTitle, AlertDescription, Button } from "@/components/ui";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -130,20 +130,23 @@ export function LoginForm() {
         </div>
 
         {error && (
-          <Alert variant="error" description={error} />
+          <Alert variant="error">
+            <AlertTitle>Erro</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="w-full h-12 bg-[var(--color-primary)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] text-white text-[var(--font-size-title3)] font-semibold font-[var(--font-sans)] flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-70 transition-opacity"
+          className="w-full h-12 text-base"
         >
           {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} />
+            <Loader2 className="size-5 animate-spin" strokeWidth={2} />
           ) : (
             "Entrar"
           )}
-        </button>
+        </Button>
       </form>
 
       <div className="flex items-center gap-4">
@@ -154,11 +157,12 @@ export function LoginForm() {
         <div className="flex-1 h-px bg-[var(--border-medium)]" />
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={handleMicrosoftLogin}
         disabled={loading}
-        className="w-full h-12 bg-[var(--surface-card)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] flex items-center justify-center gap-3 hover:bg-[var(--surface-card-hover)] disabled:opacity-70 transition-colors"
+        className="w-full h-12"
       >
         <svg
           className="w-6 h-6"
@@ -174,7 +178,7 @@ export function LoginForm() {
         <span className="text-[var(--text-primary)] text-[var(--font-size-title3)] font-medium font-[var(--font-sans)]">
           Continuar com Microsoft
         </span>
-      </button>
+      </Button>
     </div>
   );
 }

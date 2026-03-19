@@ -1,63 +1,69 @@
-"use client";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-import { type HTMLAttributes } from "react";
-import { clsx } from "clsx";
+import { cn } from "@/lib/utils"
 
-export type AlertVariant = "info" | "success" | "warning" | "error";
+const alertVariants = cva(
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border-l-[3px] px-4 py-3 text-[13px] has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+  {
+    variants: {
+      variant: {
+        default: "bg-card text-card-foreground border-l-border",
+        info: "bg-[var(--color-info-bg)] border-l-[var(--color-info)] text-[#1a4a80]",
+        success: "bg-[var(--color-success-bg)] border-l-[var(--color-success)] text-[#14532d]",
+        warning: "bg-[var(--color-warning-bg)] border-l-[var(--color-warning)] text-[#7c4700]",
+        error: "bg-[var(--color-error-bg)] border-l-[var(--color-error)] text-[#7f1d1d]",
+        destructive: "bg-[var(--color-error-bg)] border-l-[var(--color-error)] text-[#7f1d1d]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
-export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: AlertVariant;
-  title?: string;
-  description?: string;
-  icon?: React.ReactNode;
-}
-
-const variantClasses: Record<AlertVariant, string> = {
-  info: "bg-[var(--color-info-bg)] border-l-[var(--color-info)] text-[var(--alert-info-text)]",
-  success:
-    "bg-[var(--color-success-bg)] border-l-[var(--color-success)] text-[var(--alert-success-text)]",
-  warning:
-    "bg-[var(--color-warning-bg)] border-l-[var(--color-warning)] text-[var(--alert-warning-text)]",
-  error:
-    "bg-[var(--color-error-bg)] border-l-[var(--color-error)] text-[var(--alert-error-text)]",
-};
-
-export function Alert({
-  variant = "info",
-  title,
-  description,
-  icon,
+function Alert({
   className,
-  children,
+  variant,
   ...props
-}: AlertProps) {
-  const content = children ?? (
-    <>
-      {title && (
-        <div className="font-semibold mb-0.5">{title}</div>
-      )}
-      {description && (
-        <div className="opacity-80 leading-snug">{description}</div>
-      )}
-    </>
-  );
-
+}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
   return (
     <div
+      data-slot="alert"
       role="alert"
-      className={clsx(
-        "flex items-start gap-2.5 py-3 px-4 rounded-[var(--radius-lg)] border-l-[3px] text-[var(--font-size-small)]",
-        variantClasses[variant],
+      className={cn(alertVariants({ variant }), className)}
+      {...props}
+    />
+  )
+}
+
+function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-title"
+      className={cn(
+        "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
         className
       )}
       {...props}
-    >
-      {icon && (
-        <span className="text-base shrink-0 mt-0.5" aria-hidden>
-          {icon}
-        </span>
-      )}
-      <div className="flex-1 min-w-0">{content}</div>
-    </div>
-  );
+    />
+  )
 }
+
+function AlertDescription({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-description"
+      className={cn(
+        "col-start-2 grid justify-items-start gap-1 text-sm text-muted-foreground [&_p]:leading-relaxed",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Alert, AlertTitle, AlertDescription }

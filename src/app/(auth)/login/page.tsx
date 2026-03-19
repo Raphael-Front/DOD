@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LoginBranding } from "@/components/auth/LoginBranding";
-import { LoginForm } from "@/components/auth/LoginForm";
+import LoginBranding from "./components/LoginBranding";
+import LoginForm from "./components/LoginForm";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,7 +12,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         router.replace("/dashboard");
       }
@@ -21,16 +23,9 @@ export default function LoginPage() {
   }, [router, supabase]);
 
   return (
-    <div className="min-h-screen bg-[var(--surface-base)] flex overflow-hidden">
-      <div className="hidden lg:block lg:w-[960px] shrink-0">
-        <LoginBranding />
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
-        <div className="w-full max-w-[620px] bg-[var(--surface-card)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-lg)] p-8 lg:p-12 flex justify-center">
-          <LoginForm />
-        </div>
-      </div>
+    <div className="flex min-h-screen w-full overflow-hidden">
+      <LoginBranding />
+      <LoginForm />
     </div>
   );
 }

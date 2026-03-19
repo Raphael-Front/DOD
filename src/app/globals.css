@@ -1,46 +1,140 @@
+@import "../styles/tokens.css";
+@import "../styles/themes.css";
 @import "tailwindcss";
 @import "react-day-picker/style.css";
+@import "tw-animate-css";
 
-@import "../styles/tokens.css";
+/* shadcn/ui — CSS variables (convenção) mapeadas aos tokens BIM Audit */
+@layer base {
+  :root {
+    --background: var(--surface-base);
+    --foreground: var(--text-primary);
+    --card: var(--surface-card);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-card);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--text-on-primary);
+    --secondary: var(--surface-card);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--color-gray-100);
+    --muted-foreground: var(--text-tertiary);
+    --accent: var(--color-gray-50);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--color-error);
+    --destructive-foreground: var(--text-on-primary);
+    --border: var(--border-light);
+    --input: var(--border-medium);
+    --ring: var(--color-accent-blue);
+    --radius: var(--radius-lg);
+    --chart-1: var(--color-accent-blue);
+    --chart-2: var(--color-accent-teal);
+    --chart-3: var(--color-accent-green);
+    --chart-4: var(--color-accent-orange);
+    --chart-5: var(--color-accent-red);
+    --sidebar: var(--surface-sidebar);
+    --sidebar-foreground: var(--text-on-primary);
+    --sidebar-primary: rgba(255, 255, 255, 0.15);
+    --sidebar-primary-foreground: var(--text-on-primary);
+    --sidebar-accent: rgba(255, 255, 255, 0.08);
+    --sidebar-accent-foreground: var(--text-on-primary);
+    --sidebar-border: rgba(255, 255, 255, 0.1);
+    --sidebar-ring: var(--color-accent-blue);
+    --surface-content: var(--surface-base);
+    --surface-card-theme: var(--surface-card);
+    --surface-header: var(--surface-topbar);
+    --text-main: var(--text-primary);
+  }
 
-/* Tailwind v4 @theme — mapeia tokens do design system para utilitários */
-@theme {
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-light: var(--color-primary-light);
-  --color-primary-subtle: var(--color-primary-subtle);
-  --color-accent-blue: var(--color-accent-blue);
-  --color-accent-teal: var(--color-accent-teal);
-  --color-accent-orange: var(--color-accent-orange);
-  --color-accent-green: var(--color-accent-green);
-  --color-accent-red: var(--color-accent-red);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-info: var(--color-info);
-  --color-surface-base: var(--surface-base);
-  --color-surface-card: var(--surface-card);
-  --color-surface-sidebar: var(--surface-sidebar);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary: var(--text-tertiary);
-  --color-border-light: var(--border-light);
-  --color-border-medium: var(--border-medium);
-  --font-sans: var(--font-sans);
-  --font-serif-display: var(--font-serif-display);
-  --font-mono: var(--font-mono);
+  [data-theme="dark"] {
+    --background: var(--surface-base);
+    --foreground: var(--text-primary);
+    --card: var(--surface-card);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-card);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--text-on-primary);
+    --secondary: var(--surface-card);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--color-primary-subtle);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--surface-card-hover);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--color-error);
+    --destructive-foreground: var(--text-on-primary);
+    --border: var(--border-light);
+    --input: var(--border-medium);
+    --ring: var(--color-accent-blue);
+    --surface-content: var(--surface-base);
+    --surface-card-theme: var(--surface-card);
+    --surface-header: var(--surface-topbar);
+    --text-main: var(--text-primary);
+  }
+}
+
+/* Tailwind v4 — mapeamento dos tokens do design system para utilitários.
+   @theme inline lê variáveis do :root (resolvidas em runtime), sem criar
+   novas variáveis — evita referências circulares. */
+@theme inline {
+  /* Radius — usa o valor literal 8px (--radius-lg) para evitar auto-referência */
+  --radius: 8px;
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
-}
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  /* Cores — mapeia variáveis shadcn (--primary, --background, etc.)
+     que são definidas no @layer base acima e têm nomes DIFERENTES dos destinos */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Cores de acento do design system — valores literais de tokens.css
+     para que Tailwind gere utilitários como text-accent-blue, bg-accent-teal */
+  --color-accent-blue: #4a7fc1;
+  --color-accent-teal: #2ea8a8;
+  --color-accent-orange: #e8820c;
+  --color-accent-green: #22a04b;
+  --color-accent-red: #d93025;
+  --color-success: #22a04b;
+  --color-warning: #e8820c;
+  --color-error: #d93025;
+  --color-info: #4a7fc1;
+
+  /* Superfícies — nomes de origem diferentes dos de destino */
+  --color-surface-base: var(--surface-base);
+  --color-surface-card: var(--surface-card);
+  --color-surface-sidebar: var(--surface-sidebar);
+
+  /* Texto */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  /* Bordas */
+  --color-border-light: var(--border-light);
+  --color-border-medium: var(--border-medium);
+
+  /* Fontes */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 html,
@@ -50,35 +144,6 @@ body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-}
-
-#__next {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* Tema claro (padrão) — PRD 6.4 */
-:root {
-  --background: var(--surface-base);
-  --foreground: var(--text-primary);
-  --surface-content: var(--surface-base);
-  --surface-card-theme: var(--surface-card);
-  --surface-header: var(--surface-topbar);
-  --text-main: var(--text-primary);
-}
-
-/* Tema escuro — PRD 6.4
-   Nota: tokens de dark mode não existem no design-system-bim-audit.html.
-   Valores abaixo são placeholders; ajuste conforme necessário. */
-[data-theme="dark"] {
-  --surface-content: #1a2332;
-  --surface-card-theme: #212b3a;
-  --surface-header: #1e3a5f;
-  --text-main: #e9ecef;
-  --background: #1a2332;
-  --foreground: #e9ecef;
 }
 
 body {
@@ -92,33 +157,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Títulos de página — DM Serif Display, 22px/600 */
+/* Títulos de página — design system BIM Audit (DM Sans) */
 .page-title {
-  font-family: var(--font-serif-display);
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-title2);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
   color: var(--text-primary);
 }
 
 /* Tabelas — design system */
 .data-table thead tr {
-  background: #f8fafc;
+  background: var(--table-header-bg);
 }
 .data-table thead th {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--table-header-color);
   padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--table-row-border);
 }
 .data-table tbody tr {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--table-row-border);
 }
 .data-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--table-row-hover);
 }
 .data-table tbody td {
   padding: 14px 16px;
@@ -143,8 +209,8 @@ body {
   background: rgba(0, 0, 0, 0.4);
 }
 .modal-content {
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
 }
 .modal-header h2 {
   font-size: 18px;
@@ -153,11 +219,11 @@ body {
 .modal-header p,
 .modal-subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 .modal-footer {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-light);
   padding-top: 20px;
   margin-top: 4px;
 }
@@ -171,15 +237,13 @@ body {
   .retroativo-col {
     display: none !important;
   }
+  .modal-content {
+    width: 80vw !important;
+    max-width: 600px !important;
+  }
 }
 @media (max-width: 900px) {
   .retroativo-col {
     display: none !important;
-  }
-}
-@media (min-width: 768px) and (max-width: 1024px) {
-  .modal-content {
-    width: 80vw !important;
-    max-width: 600px !important;
   }
 }

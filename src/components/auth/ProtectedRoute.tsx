@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback", "/esqueci-senha"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/esqueci-senha", "/cadastro", "/redefinir-senha"];
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { status } = useAuth();
