@@ -5,7 +5,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Check, Minus, Search, Save, Loader2, Pencil, X, SlidersHorizontal, AlertTriangle } from "lucide-react";
+import {
+  ShieldCheck,
+  Check,
+  Search,
+  Save,
+  Loader2,
+  Pencil,
+  X,
+  SlidersHorizontal,
+  AlertTriangle,
+  Eye,
+  PencilLine,
+  Trash2,
+  BadgeCheck,
+  Users,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,7 +35,7 @@ import {
 } from "@/components/ui";
 import { toast } from "sonner";
 import { clsx } from "clsx";
-import type { PermissaoRow } from "@/hooks/usePermissoes";
+import { usePermissoes, type ModuloPermissaoExtras } from "@/hooks/usePermissoes";
 
 const PERFIS: Record<string, string> = {
   admin: "Administrador",
@@ -36,81 +51,31 @@ const PERFIL_BADGE_VARIANT: Record<string, "red" | "blue" | "green" | "gray"> = 
   leitura: "gray",
 };
 
-type PermissaoCell = true | false | string;
+type GrupoRow = {
+  id: string;
+  slug: string;
+  nome: string;
+  ordem: number;
+  seletor_obras: string;
+};
 
-interface MatrizRow {
-  acao: string;
-  acaoSlug: string;
-  admin: PermissaoCell;
-  engenheiro: PermissaoCell;
-  operador: PermissaoCell;
-  leitura: PermissaoCell;
-}
+type ModuloRow = {
+  id: string;
+  slug: string;
+  nome: string;
+  ordem: number;
+  tem_aprovar: boolean;
+  permite_editar: boolean;
+  permite_excluir: boolean;
+};
 
-const ACAO_ORDER = [
-  "rota_dashboard",
-  "criar_diario",
-  "aprovar_diario",
-  "rota_relatorios",
-  "rota_cadastros",
-  "rota_usuarios",
-  "excluir_diario",
-  "reabrir_diario",
-  "seletor_obras",
-  "dark_mode",
-];
-
-function permissoesToMatriz(permissoes: PermissaoRow[]): MatrizRow[] {
-  return ACAO_ORDER
-    .map((acaoSlug) => {
-      const rows = permissoes.filter((p) => p.acao === acaoSlug);
-      if (!rows.length) return null;
-
-      const getCell = (p: string): PermissaoCell => {
-        const row = rows.find((r) => r.perfil === p);
-        if (!row) return false;
-        return row.valor !== null ? row.valor : row.permitido;
-      };
-
-      return {
-        acao: rows[0].acao_label,
-        acaoSlug,
-        admin: getCell("admin"),
-        engenheiro: getCell("engenheiro"),
-        operador: getCell("operador"),
-        leitura: getCell("leitura"),
-      };
-    })
-    .filter(Boolean) as MatrizRow[];
-}
-
-function matrizToUpsert(
-  editada: MatrizRow[],
-  original: PermissaoRow[]
-): PermissaoRow[] {
-  const changed: PermissaoRow[] = [];
-  const perfis = ["admin", "engenheiro", "operador", "leitura"] as const;
-
-  for (const row of editada) {
-    for (const p of perfis) {
-      const cellValue = row[p];
-      const orig = original.find((r) => r.acao === row.acaoSlug && r.perfil === p);
-      const newPermitido = typeof cellValue === "boolean" ? cellValue : true;
-      const newValor = typeof cellValue === "string" ? cellValue : null;
-
-      if (orig?.permitido !== newPermitido || orig?.valor !== newValor) {
-        changed.push({
-          acao: row.acaoSlug,
-          acao_label: row.acao,
-          perfil: p,
-          permitido: newPermitido,
-          valor: newValor,
-        });
-      }
-    }
-  }
-  return changed;
-}
+type PermCell = {
+  ler: boolean;
+  editar: boolean;
+  excluir: boolean;
+  aprovar: boolean;
+  extras: ModuloPermissaoExtras;
+};
 
 type Usuario = {
   id: string;
@@ -119,15 +84,42 @@ type Usuario = {
   perfil: string;
 };
 
-async function fetchPermissoes(): Promise<PermissaoRow[]> {
+function emptyExtras(): ModuloPermissaoExtras {
+  return {};
+}
+
+async function fetchMatrizData(): Promise<{
+  grupos: GrupoRow[];
+  modulos: ModuloRow[];
+  cells: Map<string, PermCell>;
+}> {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from("dim_permissoes")
-    .select("acao, acao_label, perfil, permitido, valor")
-    .order("acao")
-    .order("perfil");
-  if (error) throw error;
-  return data ?? [];
+  const [{ data: grupos, error: e1 }, { data: modulos, error: e2 }, { data: raw, error: e3 }] =
+    await Promise.all([
+      supabase.from("dim_grupos").select("id, slug, nome, ordem, seletor_obras").order("ordem"),
+      supabase.from("dim_modulos").select("id, slug, nome, ordem, tem_aprovar, permite_editar, permite_excluir").order("ordem"),
+      supabase.from("dim_grupo_permissao").select("grupo_id, modulo_id, ler, editar, excluir, aprovar, extras"),
+    ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  if (e3) throw e3;
+
+  const cells = new Map<string, PermCell>();
+  for (const row of raw ?? []) {
+    const ex = (row.extras && typeof row.extras === "object" ? row.extras : {}) as ModuloPermissaoExtras;
+    cells.set(`${row.grupo_id}:${row.modulo_id}`, {
+      ler: row.ler,
+      editar: row.editar,
+      excluir: row.excluir,
+      aprovar: row.aprovar,
+      extras: { ...emptyExtras(), ...ex },
+    });
+  }
+  return {
+    grupos: (grupos ?? []) as GrupoRow[],
+    modulos: (modulos ?? []) as ModuloRow[],
+    cells,
+  };
 }
 
 async function fetchUsuarios(): Promise<Usuario[]> {
@@ -140,69 +132,105 @@ async function fetchUsuarios(): Promise<Usuario[]> {
   return data ?? [];
 }
 
-function CellIcon({ value }: { value: PermissaoCell }) {
-  if (value === true) {
-    return (
-      <span className="flex items-center justify-center">
-        <Check className="w-4 h-4 text-[var(--color-success,#22c55e)]" strokeWidth={2.5} />
-      </span>
-    );
-  }
-  if (value === false) {
-    return (
-      <span className="flex items-center justify-center">
-        <Minus className="w-4 h-4 text-[var(--text-tertiary)]" strokeWidth={2} />
-      </span>
-    );
-  }
+function IconToggle({
+  active,
+  disabled,
+  onClick,
+  title,
+  children,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span className="flex items-center justify-center text-[var(--font-size-small)] font-medium text-[var(--color-primary)]">
-      {value}
-    </span>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      title={title}
+      className={clsx(
+        "w-7 h-7 rounded-md flex items-center justify-center transition-colors shrink-0",
+        disabled && "opacity-40 cursor-not-allowed",
+        !disabled && active && "bg-[var(--color-success,#22c55e)]/20 text-[var(--color-success,#22c55e)]",
+        !disabled && !active && "bg-[var(--surface-hover)] text-[var(--text-tertiary)] hover:bg-[var(--border-light)]"
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
 export default function ControleAcessoPage() {
   const router = useRouter();
-  const { profile, user } = useAuth();
-  const perfil = profile?.perfil ?? "leitura";
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  const { temPermissaoModulo, isLoading: loadingPermHook } = usePermissoes();
+
+  useEffect(() => {
+    if (!loadingPermHook && !temPermissaoModulo("controle_acesso", "ler")) {
+      router.replace("/dashboard");
+    }
+  }, [loadingPermHook, temPermissaoModulo, router]);
 
   const [busca, setBusca] = useState("");
   const [perfilEditado, setPerfilEditado] = useState<Record<string, string>>({});
   const [editandoMatriz, setEditandoMatriz] = useState(false);
-  const [matrizEditada, setMatrizEditada] = useState<MatrizRow[]>([]);
+  const [matrizEditada, setMatrizEditada] = useState<Map<string, PermCell>>(new Map());
 
-  useEffect(() => {
-    if (perfil !== "admin") {
-      router.replace("/dashboard");
-    }
-  }, [perfil, router]);
-
-  const { data: permissoes = [], isLoading: isLoadingPermissoes } = useQuery({
-    queryKey: ["dim_permissoes"],
-    queryFn: fetchPermissoes,
-    enabled: perfil === "admin",
+  const { data: matrizData, isLoading: loadingMatriz } = useQuery({
+    queryKey: ["controle-acesso-matriz"],
+    queryFn: fetchMatrizData,
+    enabled: temPermissaoModulo("controle_acesso", "ler"),
   });
 
-  const matrizAtual = useMemo(() => permissoesToMatriz(permissoes), [permissoes]);
+  const grupos = matrizData?.grupos ?? [];
+  const modulos = matrizData?.modulos ?? [];
+
+  const cellsAtual = matrizData?.cells ?? new Map();
 
   const { data: usuarios = [], isLoading: isLoadingUsuarios } = useQuery({
     queryKey: ["controle-acesso-usuarios"],
     queryFn: fetchUsuarios,
-    enabled: perfil === "admin",
+    enabled: temPermissaoModulo("controle_acesso", "ler"),
   });
 
   const salvarMatrizMutation = useMutation({
-    mutationFn: async (rows: PermissaoRow[]) => {
+    mutationFn: async (map: Map<string, PermCell>) => {
       const supabase = createClient();
-      const { error } = await supabase
-        .from("dim_permissoes")
-        .upsert(rows, { onConflict: "acao,perfil" });
+      const rows: {
+        grupo_id: string;
+        modulo_id: string;
+        ler: boolean;
+        editar: boolean;
+        excluir: boolean;
+        aprovar: boolean;
+        extras: ModuloPermissaoExtras;
+      }[] = [];
+      map.forEach((cell, key) => {
+        const [grupoId, moduloId] = key.split(":");
+        rows.push({
+          grupo_id: grupoId,
+          modulo_id: moduloId,
+          ler: cell.ler,
+          editar: cell.editar,
+          excluir: cell.excluir,
+          aprovar: cell.aprovar,
+          extras: cell.extras,
+        });
+      });
+      const { error } = await supabase.from("dim_grupo_permissao").upsert(rows, {
+        onConflict: "grupo_id,modulo_id",
+      });
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["controle-acesso-matriz"] });
       queryClient.invalidateQueries({ queryKey: ["dim_permissoes"] });
+      queryClient.invalidateQueries({ queryKey: ["dim_grupo_permissao"] });
       setEditandoMatriz(false);
       toast.success("Matriz de permissões atualizada.");
     },
@@ -214,52 +242,83 @@ export default function ControleAcessoPage() {
   const perfilMutation = useMutation({
     mutationFn: async ({ id, novoPerfil }: { id: string; novoPerfil: string }) => {
       const supabase = createClient();
-      const { error } = await supabase
-        .from("dim_perfis")
-        .update({ perfil: novoPerfil })
-        .eq("id", id);
+      const { error } = await supabase.from("dim_perfis").update({ perfil: novoPerfil }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, { id, novoPerfil }) => {
       queryClient.invalidateQueries({ queryKey: ["controle-acesso-usuarios"] });
       setPerfilEditado((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
+        const next = { ...prev };
+        delete next[id];
+        return next;
       });
-      toast.success(`Perfil atualizado para ${PERFIS[novoPerfil] ?? novoPerfil}`);
+      toast.success(`Grupo atualizado para ${PERFIS[novoPerfil] ?? novoPerfil}`);
     },
     onError: (err: Error) => {
-      toast.error(`Erro ao atualizar perfil: ${err.message}`);
+      toast.error(`Erro ao atualizar grupo: ${err.message}`);
     },
   });
 
-  if (perfil !== "admin") return null;
+  const podeEditarMatriz = temPermissaoModulo("controle_acesso", "editar");
 
   const handleEditarMatriz = () => {
-    setMatrizEditada(matrizAtual.map((r) => ({ ...r })));
+    if (matrizData) setMatrizEditada(new Map(matrizData.cells));
     setEditandoMatriz(true);
   };
 
-  const handleCancelarMatriz = () => setEditandoMatriz(false);
-
   const handleSalvarMatriz = () => {
-    const changed = matrizToUpsert(matrizEditada, permissoes);
-    if (changed.length === 0) {
-      setEditandoMatriz(false);
-      return;
-    }
-    salvarMatrizMutation.mutate(changed);
+    salvarMatrizMutation.mutate(matrizEditada);
   };
 
-  const handleCellChange = (
-    rowIdx: number,
-    p: "admin" | "engenheiro" | "operador" | "leitura",
-    value: PermissaoCell
+  const defaultCell = (): PermCell => ({
+    ler: false,
+    editar: false,
+    excluir: false,
+    aprovar: false,
+    extras: {},
+  });
+
+  const getCell = (grupoId: string, moduloId: string): PermCell => {
+    const key = `${grupoId}:${moduloId}`;
+    if (editandoMatriz) {
+      const e = matrizEditada.get(key);
+      if (e) return e;
+    }
+    return cellsAtual.get(key) ?? defaultCell();
+  };
+
+  const setCellField = (
+    grupoId: string,
+    moduloId: string,
+    field: keyof Omit<PermCell, "extras">,
+    value: boolean
   ) => {
-    setMatrizEditada((prev) =>
-      prev.map((row, i) => (i === rowIdx ? { ...row, [p]: value } : row))
-    );
+    const key = `${grupoId}:${moduloId}`;
+    setMatrizEditada((prev) => {
+      const next = new Map(prev);
+      const base = next.get(key) ?? cellsAtual.get(key) ?? defaultCell();
+      const cur = { ...base, [field]: value };
+      next.set(key, cur);
+      return next;
+    });
+  };
+
+  const toggleExtra = (
+    grupoId: string,
+    moduloId: string,
+    k: keyof ModuloPermissaoExtras
+  ) => {
+    const key = `${grupoId}:${moduloId}`;
+    setMatrizEditada((prev) => {
+      const next = new Map(prev);
+      const base = next.get(key) ?? cellsAtual.get(key) ?? defaultCell();
+      const cur = {
+        ...base,
+        extras: { ...base.extras, [k]: !base.extras[k] },
+      };
+      next.set(key, cur);
+      return next;
+    });
   };
 
   const usuariosFiltrados = usuarios.filter((u) => {
@@ -267,6 +326,17 @@ export default function ControleAcessoPage() {
     const b = busca.toLowerCase();
     return u.nome?.toLowerCase().includes(b) || u.email?.toLowerCase().includes(b);
   });
+
+  const usuariosPorGrupo = useMemo(() => {
+    const map = new Map<string, Usuario[]>();
+    for (const g of grupos) {
+      map.set(
+        g.slug,
+        usuariosFiltrados.filter((u) => (perfilEditado[u.id] ?? u.perfil) === g.slug)
+      );
+    }
+    return map;
+  }, [grupos, usuariosFiltrados, perfilEditado]);
 
   const getPerfilAtual = (u: Usuario) => perfilEditado[u.id] ?? u.perfil;
   const temAlteracao = (u: Usuario) =>
@@ -278,7 +348,8 @@ export default function ControleAcessoPage() {
     perfilMutation.mutate({ id: u.id, novoPerfil: novo });
   };
 
-  const linhasMatriz = editandoMatriz ? matrizEditada : matrizAtual;
+  if (loadingPermHook) return null;
+  if (!temPermissaoModulo("controle_acesso", "ler")) return null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -290,20 +361,19 @@ export default function ControleAcessoPage() {
           </h1>
         </div>
         <p className="text-[var(--font-size-small)] text-[var(--text-tertiary)] mt-1 ml-10">
-          Gerencie as permissões de cada tipo de usuário no sistema
+          Grupos, módulos e permissões (ler, editar, excluir, aprovar)
         </p>
       </div>
 
-      {/* Matriz de Permissões */}
       <Card>
         <CardContent className="p-0">
           <div className="px-5 pt-5 pb-3 border-b border-[var(--border-light)] flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h2 className="font-semibold text-[var(--text-primary)] text-[var(--font-size-body)]">
-                Matriz de Permissões
+                Matriz de permissões por grupo
               </h2>
               <p className="text-[var(--font-size-small)] text-[var(--text-tertiary)] mt-0.5">
-                Visão geral do que cada perfil pode fazer no sistema
+                Módulos nas linhas; ícones: ler, editar, excluir, aprovar (Diário e Folha)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -312,7 +382,7 @@ export default function ControleAcessoPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={handleCancelarMatriz}
+                    onClick={() => setEditandoMatriz(false)}
                     disabled={salvarMatrizMutation.isPending}
                     className="gap-1.5 text-[var(--text-secondary)]"
                   >
@@ -322,7 +392,7 @@ export default function ControleAcessoPage() {
                   <Button
                     size="sm"
                     onClick={handleSalvarMatriz}
-                    disabled={salvarMatrizMutation.isPending}
+                    disabled={salvarMatrizMutation.isPending || !podeEditarMatriz}
                     className="gap-1.5"
                   >
                     {salvarMatrizMutation.isPending ? (
@@ -338,7 +408,7 @@ export default function ControleAcessoPage() {
                   size="sm"
                   variant="outline"
                   onClick={handleEditarMatriz}
-                  disabled={isLoadingPermissoes}
+                  disabled={loadingMatriz || !podeEditarMatriz}
                   className="gap-1.5"
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -348,76 +418,139 @@ export default function ControleAcessoPage() {
             </div>
           </div>
 
-          {isLoadingPermissoes ? (
+          {loadingMatriz ? (
             <div className="flex items-center justify-center py-16 gap-3 text-[var(--text-tertiary)]">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-[var(--font-size-small)]">Carregando permissões...</span>
+              <span className="text-[var(--font-size-small)]">Carregando matriz...</span>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-[var(--font-size-small)]">
+              <table className="w-full text-[var(--font-size-small)] min-w-[720px]">
                 <thead>
                   <tr className="border-b border-[var(--border-light)]">
-                    <th className="text-left px-5 py-3 font-semibold text-[var(--text-secondary)] w-1/3">
-                      Rota / Ação
+                    <th className="text-left px-4 py-3 font-semibold text-[var(--text-secondary)] w-40">
+                      Módulo
                     </th>
-                    {(["admin", "engenheiro", "operador", "leitura"] as const).map((p) => (
-                      <th key={p} className="text-center px-4 py-3 font-semibold text-[var(--text-secondary)]">
-                        <Badge variant={PERFIL_BADGE_VARIANT[p]}>
-                          {PERFIS[p]}
-                        </Badge>
+                    {grupos.map((g) => (
+                      <th key={g.id} className="text-center px-2 py-3 font-semibold text-[var(--text-secondary)] min-w-[140px]">
+                        <Badge variant={PERFIL_BADGE_VARIANT[g.slug] ?? "gray"}>{g.nome}</Badge>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {linhasMatriz.map((row, idx) => (
+                  {modulos.map((mod, idx) => (
                     <tr
-                      key={row.acaoSlug}
+                      key={mod.id}
                       className={clsx(
                         "border-b border-[var(--border-light)] last:border-0",
-                        idx % 2 === 0
-                          ? "bg-[var(--surface-base)]"
-                          : "bg-[var(--surface-card)]"
+                        idx % 2 === 0 ? "bg-[var(--surface-base)]" : "bg-[var(--surface-card)]"
                       )}
                     >
-                      <td className="px-5 py-3 font-medium text-[var(--text-primary)]">
-                        {row.acao}
+                      <td className="px-4 py-3 font-medium text-[var(--text-primary)] align-top">
+                        {mod.nome}
+                        {mod.slug === "diario_obra" || mod.slug === "folha_pagamento" ? (
+                          <p className="text-[var(--font-size-mini)] text-[var(--text-tertiary)] font-normal mt-1">
+                            + extras abaixo
+                          </p>
+                        ) : null}
                       </td>
-                      {(["admin", "engenheiro", "operador", "leitura"] as const).map((p) => (
-                        <td key={p} className="px-4 py-3 text-center">
-                          {editandoMatriz ? (
-                            typeof row[p] === "boolean" ? (
-                              <button
-                                type="button"
-                                onClick={() => handleCellChange(idx, p, !row[p])}
-                                className={clsx(
-                                  "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors",
-                                  row[p]
-                                    ? "bg-[var(--color-success,#22c55e)]/15 hover:bg-[var(--color-success,#22c55e)]/25"
-                                    : "bg-[var(--surface-hover)] hover:bg-[var(--border-light)]"
-                                )}
-                                title={row[p] ? "Clique para remover permissão" : "Clique para conceder permissão"}
+                      {grupos.map((g) => {
+                        const cell = getCell(g.id, mod.id);
+                        const edit = editandoMatriz;
+                        return (
+                          <td key={g.id} className="px-2 py-2 align-top">
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              <IconToggle
+                                active={cell.ler}
+                                disabled={!edit || !podeEditarMatriz}
+                                onClick={() =>
+                                  setCellField(g.id, mod.id, "ler", !cell.ler)
+                                }
+                                title="Ler / visualizar"
                               >
-                                {row[p] ? (
-                                  <Check className="w-4 h-4 text-[var(--color-success,#22c55e)]" strokeWidth={2.5} />
-                                ) : (
-                                  <Minus className="w-4 h-4 text-[var(--text-tertiary)]" strokeWidth={2} />
-                                )}
-                              </button>
-                            ) : (
-                              <input
-                                type="text"
-                                value={row[p] as string}
-                                onChange={(e) => handleCellChange(idx, p, e.target.value)}
-                                className="w-28 text-center text-[var(--font-size-small)] font-medium bg-[var(--surface-hover)] border border-[var(--border-light)] rounded px-2 py-1 text-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] mx-auto block"
-                              />
-                            )
-                          ) : (
-                            <CellIcon value={row[p]} />
-                          )}
-                        </td>
-                      ))}
+                                <Eye className="w-3.5 h-3.5" strokeWidth={2} />
+                              </IconToggle>
+                              {mod.permite_editar && (
+                                <IconToggle
+                                  active={cell.editar}
+                                  disabled={!edit || !podeEditarMatriz}
+                                  onClick={() =>
+                                    setCellField(g.id, mod.id, "editar", !cell.editar)
+                                  }
+                                  title="Editar"
+                                >
+                                  <PencilLine className="w-3.5 h-3.5" strokeWidth={2} />
+                                </IconToggle>
+                              )}
+                              {mod.permite_excluir && (
+                                <IconToggle
+                                  active={cell.excluir}
+                                  disabled={!edit || !podeEditarMatriz}
+                                  onClick={() =>
+                                    setCellField(g.id, mod.id, "excluir", !cell.excluir)
+                                  }
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                                </IconToggle>
+                              )}
+                              {mod.tem_aprovar && (
+                                <IconToggle
+                                  active={cell.aprovar}
+                                  disabled={!edit || !podeEditarMatriz}
+                                  onClick={() =>
+                                    setCellField(g.id, mod.id, "aprovar", !cell.aprovar)
+                                  }
+                                  title="Aprovar"
+                                >
+                                  <BadgeCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                                </IconToggle>
+                              )}
+                            </div>
+                            {mod.slug === "diario_obra" && (
+                              <div className="flex flex-wrap gap-1 justify-center mt-1 pt-1 border-t border-[var(--border-light)]/60">
+                                <span className="text-[10px] text-[var(--text-tertiary)] w-full text-center">
+                                  Reabrir diário
+                                </span>
+                                <IconToggle
+                                  active={Boolean(cell.extras.reabrir_diario)}
+                                  disabled={!edit || !podeEditarMatriz}
+                                  onClick={() => toggleExtra(g.id, mod.id, "reabrir_diario")}
+                                  title="Reabrir diário aprovado"
+                                >
+                                  <ShieldCheck className="w-3 h-3" strokeWidth={2} />
+                                </IconToggle>
+                              </div>
+                            )}
+                            {mod.slug === "folha_pagamento" && (
+                              <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-[var(--border-light)]/60">
+                                {(
+                                  [
+                                    ["exportar_uau", "Exportar UAU"],
+                                    ["debitar_folha", "Debitar"],
+                                    ["alterar_parametros_folha", "Parâmetros"],
+                                  ] as const
+                                ).map(([k, label]) => (
+                                  <div key={k} className="flex items-center justify-center gap-1">
+                                    <span className="text-[9px] text-[var(--text-tertiary)] truncate max-w-[56px]">
+                                      {label}
+                                    </span>
+                                    <IconToggle
+                                      active={Boolean(cell.extras[k])}
+                                      disabled={!edit || !podeEditarMatriz}
+                                      onClick={() => toggleExtra(g.id, mod.id, k)}
+                                      title={label}
+                                    >
+                                      <Check className="w-3 h-3" strokeWidth={2} />
+                                    </IconToggle>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
@@ -427,17 +560,19 @@ export default function ControleAcessoPage() {
         </CardContent>
       </Card>
 
-      {/* Gerenciar Usuários */}
       <Card>
         <CardContent className="p-0">
           <div className="px-5 pt-5 pb-3 border-b border-[var(--border-light)] flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="font-semibold text-[var(--text-primary)] text-[var(--font-size-body)]">
-                Gerenciar Usuários
-              </h2>
-              <p className="text-[var(--font-size-small)] text-[var(--text-tertiary)] mt-0.5">
-                Altere o perfil de acesso de cada usuário
-              </p>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-[var(--color-primary)]" />
+              <div>
+                <h2 className="font-semibold text-[var(--text-primary)] text-[var(--font-size-body)]">
+                  Integrantes dos grupos
+                </h2>
+                <p className="text-[var(--font-size-small)] text-[var(--text-tertiary)] mt-0.5">
+                  Usuários por grupo; altere o grupo e salve
+                </p>
+              </div>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
@@ -455,114 +590,95 @@ export default function ControleAcessoPage() {
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-[var(--font-size-small)]">Carregando usuários...</span>
             </div>
-          ) : usuariosFiltrados.length === 0 ? (
-            <div className="flex items-center justify-center py-16 text-[var(--text-tertiary)] text-[var(--font-size-small)]">
-              {busca ? "Nenhum usuário encontrado para essa busca." : "Nenhum usuário cadastrado."}
-            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[var(--font-size-small)]">
-                <thead>
-                  <tr className="border-b border-[var(--border-light)]">
-                    <th className="text-left px-5 py-3 font-semibold text-[var(--text-secondary)]">
-                      Usuário
-                    </th>
-                    <th className="text-left px-4 py-3 font-semibold text-[var(--text-secondary)]">
-                      E-mail
-                    </th>
-                    <th className="text-left px-4 py-3 font-semibold text-[var(--text-secondary)]">
-                      Perfil Atual
-                    </th>
-                    <th className="text-left px-4 py-3 font-semibold text-[var(--text-secondary)]">
-                      Alterar Para
-                    </th>
-                    <th className="px-4 py-3" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {usuariosFiltrados.map((u, idx) => {
-                    const perfilAtual = getPerfilAtual(u);
-                    const alterado = temAlteracao(u);
-                    const salvando = perfilMutation.isPending && perfilMutation.variables?.id === u.id;
-
-                    return (
-                      <tr
-                        key={u.id}
-                        className={clsx(
-                          "border-b border-[var(--border-light)] last:border-0",
-                          idx % 2 === 0
-                            ? "bg-[var(--surface-base)]"
-                            : "bg-[var(--surface-card)]",
-                          alterado && "ring-1 ring-inset ring-[var(--color-primary)]/20"
-                        )}
-                      >
-                        <td className="px-5 py-3 font-medium text-[var(--text-primary)]">
-                          {u.nome}
-                          {u.id === user?.id && (
-                            <span className="ml-2 text-[var(--text-tertiary)] font-normal">(você)</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-[var(--text-secondary)]">
-                          {u.email}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant={PERFIL_BADGE_VARIANT[u.perfil] ?? "gray"}>
-                            {PERFIS[u.perfil] ?? u.perfil}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Select
-                            value={perfilAtual}
-                            onValueChange={(val) =>
-                              setPerfilEditado((prev) => ({ ...prev, [u.id]: val }))
-                            }
-                            disabled={u.id === user?.id || salvando}
-                          >
-                            <SelectTrigger className="w-44 h-8 text-[var(--font-size-small)]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(PERFIS).map(([key, label]) => (
-                                <SelectItem key={key} value={key}>
-                                  {label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          {alterado && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleSalvarPerfil(u)}
-                              disabled={salvando || u.id === user?.id}
-                              className="gap-1.5"
+            <div className="flex flex-col gap-4 p-5">
+              {grupos.map((g) => {
+                const lista = usuariosPorGrupo.get(g.slug) ?? [];
+                return (
+                  <div
+                    key={g.id}
+                    className="rounded-[var(--radius-md)] border border-[var(--border-light)] bg-[var(--surface-card)] p-4"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant={PERFIL_BADGE_VARIANT[g.slug] ?? "gray"}>{g.nome}</Badge>
+                      <span className="text-[var(--font-size-mini)] text-[var(--text-tertiary)]">
+                        {lista.length} usuário(s)
+                      </span>
+                    </div>
+                    {lista.length === 0 ? (
+                      <p className="text-[var(--font-size-small)] text-[var(--text-tertiary)]">
+                        Nenhum usuário neste grupo.
+                      </p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {lista.map((u) => {
+                          const alterado = temAlteracao(u);
+                          const salvando =
+                            perfilMutation.isPending && perfilMutation.variables?.id === u.id;
+                          return (
+                            <li
+                              key={u.id}
+                              className="flex flex-wrap items-center gap-3 text-[var(--font-size-small)] border-b border-[var(--border-light)]/50 last:border-0 pb-2 last:pb-0"
                             >
-                              {salvando ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Save className="w-3.5 h-3.5" />
+                              <span className="font-medium text-[var(--text-primary)] min-w-[120px]">
+                                {u.nome}
+                                {u.id === user?.id && (
+                                  <span className="ml-2 text-[var(--text-tertiary)] font-normal">(você)</span>
+                                )}
+                              </span>
+                              <span className="text-[var(--text-secondary)] flex-1 truncate">{u.email}</span>
+                              <Select
+                                value={getPerfilAtual(u)}
+                                onValueChange={(val) =>
+                                  setPerfilEditado((prev) => ({ ...prev, [u.id]: val }))
+                                }
+                                disabled={u.id === user?.id || salvando || !podeEditarMatriz}
+                              >
+                                <SelectTrigger className="w-44 h-8 text-[var(--font-size-small)]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {grupos.map((gr) => (
+                                    <SelectItem key={gr.slug} value={gr.slug}>
+                                      {gr.nome}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {alterado && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSalvarPerfil(u)}
+                                  disabled={salvando || u.id === user?.id}
+                                  className="gap-1.5"
+                                >
+                                  {salvando ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Save className="w-3.5 h-3.5" />
+                                  )}
+                                  Salvar
+                                </Button>
                               )}
-                              Salvar
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
       </Card>
 
-      <ParametrosCalculo isAdmin={profile?.perfil === "admin"} userId={user?.id ?? ""} />
+      <ParametrosCalculo userId={user?.id ?? ""} />
     </div>
   );
 }
 
-// ─── Seção de Parâmetros de Cálculo da Folha ─────────────────────────────────
+// ─── Parâmetros de cálculo (usa permissão sincronizada) ─────────────────────
 
 type Parametro = {
   campo: string;
@@ -582,7 +698,9 @@ async function fetchParametros(): Promise<Parametro[]> {
   return (data ?? []) as Parametro[];
 }
 
-function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
+function ParametrosCalculo({ userId }: { userId: string }) {
+  const { temPermissao } = usePermissoes();
+  const isAdmin = temPermissao("alterar_parametros_folha");
   const queryClient = useQueryClient();
   const [editingParam, setEditingParam] = useState<Parametro | null>(null);
   const [novoValor, setNovoValor] = useState("");
@@ -611,7 +729,6 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
 
       if (error) throw error;
 
-      // Gravar audit log
       await supabase.from("f_folha_audit_log").insert({
         folha_id: null,
         acao: "alteracao_parametro",
@@ -661,7 +778,7 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
         Faixas e alíquotas de INSS, IRRF e benefícios. Alterações não retroagem em folhas fechadas.
         {!isAdmin && (
           <span className="ml-2 text-[var(--color-warning)]">
-            Somente administradores podem editar.
+            Somente quem tem permissão de parâmetros pode editar.
           </span>
         )}
       </p>
@@ -696,19 +813,16 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
                           <td className="font-mono text-[var(--font-size-mini)] text-[var(--text-tertiary)]">
                             {p.campo}
                           </td>
-                          <td className="text-[var(--text-secondary)]">
-                            {p.descricao ?? "—"}
-                          </td>
+                          <td className="text-[var(--text-secondary)]">{p.descricao ?? "—"}</td>
                           <td className="text-right tabular-nums font-semibold text-[var(--text-primary)]">
-                            {p.parametro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                            {p.parametro.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 4,
+                            })}
                           </td>
                           {isAdmin && (
                             <td className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleOpenEdit(p)}
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(p)}>
                                 <Pencil className="size-4" />
                                 Editar
                               </Button>
@@ -724,7 +838,6 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
         </div>
       )}
 
-      {/* Modal de edição com confirmação dupla */}
       {editingParam && (
         <div
           className="modal-overlay fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4"
@@ -789,10 +902,7 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
                   </div>
 
                   <div className="flex gap-3">
-                    <Button
-                      onClick={() => setStep(2)}
-                      disabled={!novoValor || !motivo.trim()}
-                    >
+                    <Button onClick={() => setStep(2)} disabled={!novoValor || !motivo.trim()}>
                       Continuar
                     </Button>
                     <Button variant="secondary" onClick={handleCloseModal}>
@@ -822,16 +932,11 @@ function ParametrosCalculo({ isAdmin, userId }: { isAdmin: boolean; userId: stri
                   </div>
 
                   {salvarMutation.isError && (
-                    <p className="text-xs text-[var(--color-error)]">
-                      Erro ao salvar. Tente novamente.
-                    </p>
+                    <p className="text-xs text-[var(--color-error)]">Erro ao salvar. Tente novamente.</p>
                   )}
 
                   <div className="flex gap-3">
-                    <Button
-                      onClick={() => salvarMutation.mutate()}
-                      disabled={salvarMutation.isPending}
-                    >
+                    <Button onClick={() => salvarMutation.mutate()} disabled={salvarMutation.isPending}>
                       {salvarMutation.isPending ? "Salvando..." : "Confirmar Alteração"}
                     </Button>
                     <Button variant="secondary" onClick={() => setStep(1)}>

@@ -45,9 +45,20 @@ export default function LoginForm() {
     }
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get("error") === "auth_failed") {
+    const err = params.get("error");
+    if (err === "auth_failed") {
       setError(
         "Não foi possível validar o link de acesso. Peça um novo convite ao administrador ou entre com e-mail e senha."
+      );
+      window.history.replaceState({}, "", "/login");
+    } else if (err === "invite_pkce") {
+      setError(
+        "O convite não pôde ser validado: o e-mail ainda usa o link antigo do Supabase (fluxo com código). Peça ao administrador para atualizar o template de convite em Authentication → Email Templates conforme o arquivo doc/SUPABASE_INVITE_EMAIL_TEMPLATE.md e enviar um novo convite."
+      );
+      window.history.replaceState({}, "", "/login");
+    } else if (err === "invite_otp_failed") {
+      setError(
+        "O link do convite é inválido ou expirou. Peça um novo convite ao administrador ou entre com e-mail e senha."
       );
       window.history.replaceState({}, "", "/login");
     }

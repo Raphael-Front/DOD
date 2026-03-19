@@ -10,6 +10,33 @@ export type PermissaoRow = {
   valor: string | null;
 };
 
+export type ModuloPermissaoExtras = {
+  reabrir_diario?: boolean;
+  exportar_uau?: boolean;
+  debitar_folha?: boolean;
+  alterar_parametros_folha?: boolean;
+};
+
+export type ModuloPermissaoRow = {
+  grupo_id: string;
+  modulo_id: string;
+  ler: boolean;
+  editar: boolean;
+  excluir: boolean;
+  aprovar: boolean;
+  extras: ModuloPermissaoExtras;
+  dim_modulos: {
+    slug: string;
+    nome: string;
+    tem_aprovar: boolean;
+    permite_editar: boolean;
+    permite_excluir: boolean;
+    ordem: number;
+  };
+};
+
+export type PermissaoTipo = "ler" | "editar" | "excluir" | "aprovar";
+
 async function fetchPermissoes(): Promise<PermissaoRow[]> {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -21,13 +48,60 @@ async function fetchPermissoes(): Promise<PermissaoRow[]> {
   return data ?? [];
 }
 
+async function fetchPermissoesPorModulo(perfil: string): Promise<ModuloPermissaoRow[]> {
+  const supabase = createClient();
+  const { data: grupo, error: e1 } = await supabase
+    .from("dim_grupos")
+    .select("id")
+    .eq("slug", perfil)
+    .maybeSingle();
+  if (e1) throw e1;
+  if (!grupo) return [];
+
+  const { data, error } = await supabase
+    .from("dim_grupo_permissao")
+    .select(
+      `
+      grupo_id,
+      modulo_id,
+      ler,
+      editar,
+      excluir,
+      aprovar,
+      extras,
+      dim_modulos (
+        slug,
+        nome,
+        tem_aprovar,
+        permite_editar,
+        permite_excluir,
+        ordem
+      )
+    `
+    )
+    .eq("grupo_id", grupo.id);
+
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as ModuloPermissaoRow[];
+  return rows.sort(
+    (a, b) => (a.dim_modulos?.ordem ?? 0) - (b.dim_modulos?.ordem ?? 0)
+  );
+}
+
 export function usePermissoes() {
   const { profile, status } = useAuth();
   const perfil = profile?.perfil ?? "leitura";
 
-  const { data: permissoes = [], isLoading } = useQuery({
+  const { data: permissoes = [], isLoading: loadingLegacy } = useQuery({
     queryKey: ["dim_permissoes"],
     queryFn: fetchPermissoes,
+    enabled: status === "authenticated",
+    staleTime: 30_000,
+  });
+
+  const { data: permissoesModulo = [], isLoading: loadingModulo } = useQuery({
+    queryKey: ["dim_grupo_permissao", perfil],
+    queryFn: () => fetchPermissoesPorModulo(perfil),
     enabled: status === "authenticated",
     staleTime: 30_000,
   });
@@ -42,5 +116,46 @@ export function usePermissoes() {
     return row?.valor ?? null;
   }
 
-  return { permissoes, temPermissao, getValor, isLoading };
+  function temPermissaoModulo(moduloSlug: string, tipo: PermissaoTipo): boolean {
+    const row = permissoesModulo.find((r) => r.dim_modulos?.slug === moduloSlug);
+    if (!row) return false;
+    switch (tipo) {
+      case "ler":
+        return row.ler;
+      case "editar":
+        return row.editar;
+      case "excluir":
+        return row.excluir;
+      case "aprovar":
+        return row.aprovar;
+      default:
+        return false;
+    }
+  }
+
+  function getExtrasModulo(moduloSlug: string): ModuloPermissaoExtras {
+    const row = permissoesModulo.find((r) => r.dim_modulos?.slug === moduloSlug);
+    const ex = row?.extras;
+    if (!ex || typeof ex !== "object") return {};
+    return ex as ModuloPermissaoExtras;
+  }
+
+  function temExtraModulo(
+    moduloSlug: string,
+    chave: keyof ModuloPermissaoExtras
+  ): boolean {
+    const v = getExtrasModulo(moduloSlug)[chave];
+    return Boolean(v);
+  }
+
+  return {
+    permissoes,
+    permissoesModulo,
+    temPermissao,
+    getValor,
+    temPermissaoModulo,
+    getExtrasModulo,
+    temExtraModulo,
+    isLoading: loadingLegacy || loadingModulo,
+  };
 }

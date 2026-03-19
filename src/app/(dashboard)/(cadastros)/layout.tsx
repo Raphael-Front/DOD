@@ -28,9 +28,9 @@ export default function CadastrosLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { status } = useAuth();
-  const { temPermissao, isLoading } = usePermissoes();
+  const { temPermissaoModulo, isLoading } = usePermissoes();
 
-  const temAcesso = temPermissao("rota_cadastros");
+  const temAcesso = temPermissaoModulo("cadastros", "ler");
 
   useEffect(() => {
     if (!isLoading && status === "authenticated" && !temAcesso) {

@@ -11,3 +11,7 @@ No painel: **Authentication → URL Configuration**
   - `https://<seu-dominio>/` — raiz do app.
 
 Em desenvolvimento local, acrescente também `http://localhost:3000` e as mesmas rotas `/auth/callback` e `/auth/invite`.
+
+## Convite por e-mail (crítico)
+
+Só configurar URLs **não basta**: o template de e-mail de convite precisa usar **`token_hash`** apontando para `/auth/invite`, senão o link virá com `?code=` (PKCE) e **não funcionará** neste app. Veja o passo a passo em **[SUPABASE_INVITE_EMAIL_TEMPLATE.md](./SUPABASE_INVITE_EMAIL_TEMPLATE.md)**.

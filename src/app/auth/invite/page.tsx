@@ -7,9 +7,11 @@ import { createClient } from "@/lib/supabase/client";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
 /**
- * Convite por e-mail: troca do código e sessão rodam **só no navegador**.
- * Assim, scanners de e-mail que só fazem GET (sem JS) tendem a não consumir o código PKCE
- * antes do usuário — problema comum com Route Handlers que trocam o código no servidor.
+ * Convite por e-mail no navegador.
+ *
+ * O fluxo com `?code=` (PKCE) exige `code_verifier` no storage do cliente; o convite é criado
+ * no servidor, então esse verificador não existe — a troca falha. Por isso o e-mail no Supabase
+ * deve usar `token_hash` apontando para esta rota (`verifyOtp`). Ver `doc/SUPABASE_INVITE_EMAIL_TEMPLATE.md`.
  */
 export default function AuthInvitePage() {
   const router = useRouter();
@@ -31,8 +33,6 @@ export default function AuthInvitePage() {
       const typeParam = url.searchParams.get("type");
 
       const supabase = createClient();
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
       if (tokenHash) {
         const otpType: EmailOtpType =
@@ -50,7 +50,8 @@ export default function AuthInvitePage() {
 
         if (cancelled) return;
         if (error) {
-          router.replace("/login?error=auth_failed");
+          console.error("[auth/invite] verifyOtp:", error.message);
+          router.replace("/login?error=invite_otp_failed");
           return;
         }
         router.replace("/definir-senha");
@@ -62,26 +63,18 @@ export default function AuthInvitePage() {
         return;
       }
 
-      const tokenJson = await exchangePkceCodeForTokens(
-        supabaseUrl,
-        anonKey,
-        code
-      );
+      // `?code=` sem token_hash: só funciona se o navegador já tiver PKCE (ex.: OAuth no mesmo site).
+      // E-mail padrão do Supabase (só ConfirmationURL) → falha; use template com token_hash.
+      const { error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(code);
       if (cancelled) return;
 
-      if (!tokenJson?.access_token || !tokenJson.refresh_token) {
-        router.replace("/login?error=auth_failed");
-        return;
-      }
-
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: tokenJson.access_token,
-        refresh_token: tokenJson.refresh_token,
-      });
-
-      if (cancelled) return;
-      if (sessionError) {
-        router.replace("/login?error=auth_failed");
+      if (exchangeError) {
+        console.error(
+          "[auth/invite] exchangeCodeForSession:",
+          exchangeError.message
+        );
+        router.replace("/login?error=invite_pkce");
         return;
       }
 
@@ -108,49 +101,4 @@ export default function AuthInvitePage() {
       </p>
     </div>
   );
-}
-
-async function exchangePkceCodeForTokens(
-  supabaseUrl: string,
-  anonKey: string,
-  authCode: string
-): Promise<{ access_token: string; refresh_token: string } | null> {
-  const url = `${supabaseUrl.replace(/\/$/, "")}/auth/v1/token?grant_type=pkce`;
-
-  const attempts = [
-    { auth_code: authCode, code_verifier: "" },
-    { auth_code: authCode },
-  ];
-
-  for (const body of attempts) {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const text = await res.text();
-    if (!res.ok) continue;
-
-    try {
-      const data = JSON.parse(text) as {
-        access_token?: string;
-        refresh_token?: string;
-      };
-      if (data.access_token && data.refresh_token) {
-        return {
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-        };
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  return null;
 }

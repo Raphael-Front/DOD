@@ -49,20 +49,49 @@ async function fetchObras() {
   return data ?? [];
 }
 
-const ALL_PRINCIPAL_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissao: null },
-  { href: "/diarios", label: "Diário da Obra", icon: Calendar, permissao: null },
-  { href: "/folha-de-pagamento", label: "Folha de Pagamento", icon: Receipt, permissao: "rota_folha" },
-  { href: "/relatorios", label: "Relatórios", icon: FileText, permissao: "rota_relatorios" },
+type ModuloSlug =
+  | "dashboard"
+  | "diario_obra"
+  | "folha_pagamento"
+  | "relatorios"
+  | "cadastros"
+  | "usuarios"
+  | "controle_acesso";
+
+const ALL_PRINCIPAL_ITEMS: {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  modulo: ModuloSlug;
+}[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, modulo: "dashboard" },
+  { href: "/diarios", label: "Diário da Obra", icon: Calendar, modulo: "diario_obra" },
+  {
+    href: "/folha-de-pagamento",
+    label: "Folha de Pagamento",
+    icon: Receipt,
+    modulo: "folha_pagamento",
+  },
+  { href: "/relatorios", label: "Relatórios", icon: FileText, modulo: "relatorios" },
 ];
 
-const gestaoItems = [
-  { href: "/obras", label: "Cadastros", icon: ClipboardList },
-  { href: "/usuarios", label: "Usuários", icon: Users },
+const gestaoItems: {
+  href: string;
+  label: string;
+  icon: typeof ClipboardList;
+  modulo: ModuloSlug;
+}[] = [
+  { href: "/obras", label: "Cadastros", icon: ClipboardList, modulo: "cadastros" },
+  { href: "/usuarios", label: "Usuários", icon: Users, modulo: "usuarios" },
 ];
 
-const gestaoAdminItems = [
-  { href: "/controle-acesso", label: "Controle de Acesso", icon: ShieldCheck },
+const gestaoAdminItems: {
+  href: string;
+  label: string;
+  icon: typeof ShieldCheck;
+  modulo: ModuloSlug;
+}[] = [
+  { href: "/controle-acesso", label: "Controle de Acesso", icon: ShieldCheck, modulo: "controle_acesso" },
 ];
 
 const CADASTROS_PATHS = ["/obras", "/funcoes", "/fornecedores", "/equipamentos"];
@@ -76,13 +105,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/" ||
     AUTH_PATHS.some((path) => pathname?.startsWith(path));
 
-  const perfil = profile?.perfil ?? "leitura";
-  const { temPermissao } = usePermissoes();
-  const mostraGestao = temPermissao("rota_cadastros");
-  const mostraControleAcesso = perfil === "admin";
-  const principalItems = ALL_PRINCIPAL_ITEMS.filter(
-    (item) => item.permissao === null || temPermissao(item.permissao)
+  const { temPermissaoModulo } = usePermissoes();
+  const principalItems = ALL_PRINCIPAL_ITEMS.filter((item) =>
+    temPermissaoModulo(item.modulo, "ler")
   );
+  const gestaoItemsVisiveis = gestaoItems.filter((item) =>
+    temPermissaoModulo(item.modulo, "ler")
+  );
+  const mostraControleAcesso = temPermissaoModulo("controle_acesso", "ler");
+  const mostraGestao =
+    gestaoItemsVisiveis.length > 0 || mostraControleAcesso;
   const { theme, setTheme } = useTheme();
   const [obrasDropdownOpen, setObrasDropdownOpen] = useState(false);
   const obrasDropdownRef = useRef<HTMLDivElement>(null);
@@ -265,7 +297,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     GESTÃO
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    {gestaoItems.map((item) => {
+                    {gestaoItemsVisiveis.map((item) => {
                       const active = isActive(item.href);
                       return (
                         <Link

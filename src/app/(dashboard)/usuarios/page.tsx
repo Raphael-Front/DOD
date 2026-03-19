@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Plus, Pencil, Search, X, Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissoes } from "@/hooks/usePermissoes";
 import { Button, InputField, Badge, Card } from "@/components/ui";
 import { toast } from "sonner";
 
@@ -85,12 +86,13 @@ export default function UsuariosPage() {
   const router = useRouter();
   const { profile, user } = useAuth();
   const perfil = profile?.perfil ?? "leitura";
+  const { temPermissaoModulo, isLoading: loadingPerms } = usePermissoes();
 
   useEffect(() => {
-    if (perfil !== "admin") {
+    if (!loadingPerms && !temPermissaoModulo("usuarios", "ler")) {
       router.replace("/dashboard");
     }
-  }, [perfil, router]);
+  }, [loadingPerms, temPermissaoModulo, router]);
 
   const [busca, setBusca] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -251,7 +253,7 @@ export default function UsuariosPage() {
     mutation.mutate();
   };
 
-  if (perfil !== "admin") {
+  if (loadingPerms || !temPermissaoModulo("usuarios", "ler")) {
     return null;
   }
 
@@ -498,7 +500,9 @@ export default function UsuariosPage() {
                       Cancelar
                     </Button>
                   </div>
-                  {editingId && perfil === "admin" && user?.id !== editingId && (
+                  {editingId &&
+                    temPermissaoModulo("usuarios", "excluir") &&
+                    user?.id !== editingId && (
                     <Button
                       type="button"
                       variant="ghost"
