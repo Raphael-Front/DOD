@@ -15,7 +15,23 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
+
+  const oauthError = requestUrl.searchParams.get("error");
+  const oauthErrorDesc = requestUrl.searchParams.get("error_description");
+  if (oauthError) {
+    console.error(
+      "[auth/invite] redirect com erro do Auth:",
+      oauthError,
+      oauthErrorDesc ?? ""
+    );
+    return NextResponse.redirect(
+      new URL("/login?error=auth_failed", requestUrl.origin)
+    );
+  }
+
+  const code =
+    requestUrl.searchParams.get("code") ??
+    requestUrl.searchParams.get("auth_code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const typeParam = requestUrl.searchParams.get("type");
 
