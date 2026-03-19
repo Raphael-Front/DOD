@@ -19,9 +19,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPublicPath = PUBLIC_PATHS.some((path) =>
-    pathname?.startsWith(path)
-  );
+  const isPublicPath =
+    pathname === "/" ||
+    PUBLIC_PATHS.some((path) => pathname?.startsWith(path));
 
   useEffect(() => {
     if (status === "loading") return;

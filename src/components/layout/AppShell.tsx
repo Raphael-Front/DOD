@@ -72,7 +72,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { signOut, profile, status } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const isAuthPage = AUTH_PATHS.some((path) => pathname?.startsWith(path));
+  const isAuthPage =
+    pathname === "/" ||
+    AUTH_PATHS.some((path) => pathname?.startsWith(path));
 
   const perfil = profile?.perfil ?? "leitura";
   const { temPermissao } = usePermissoes();
