@@ -31,6 +31,7 @@ import { useTheme } from "@/hooks/useTheme";
 const AUTH_PATHS = [
   "/login",
   "/auth/callback",
+  "/auth/invite",
   "/esqueci-senha",
   "/cadastro",
   "/redefinir-senha",

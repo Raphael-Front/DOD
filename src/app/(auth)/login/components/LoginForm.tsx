@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Loader2 } from "lucide-react";
@@ -14,6 +14,17 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "auth_failed") {
+      setError(
+        "Não foi possível validar o link de acesso. Peça um novo convite ao administrador ou entre com e-mail e senha."
+      );
+      window.history.replaceState({}, "", "/login");
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

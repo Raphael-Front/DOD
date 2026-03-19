@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const PUBLIC_PATHS = [
   "/login",
   "/auth/callback",
+  "/auth/invite",
   "/esqueci-senha",
   "/cadastro",
   "/redefinir-senha",

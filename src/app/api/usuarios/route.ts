@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const { data: inviteData, error: inviteError } =
     await admin.auth.admin.inviteUserByEmail(email.trim(), {
       data: { nome: nome.trim() },
-      redirectTo: `${siteUrl}/auth/callback?next=/definir-senha`,
+      redirectTo: `${siteUrl}/auth/invite`,
     });
 
   if (inviteError) {
