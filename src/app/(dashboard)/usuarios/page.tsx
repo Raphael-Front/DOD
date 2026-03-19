@@ -83,7 +83,7 @@ async function fetchObras() {
 
 export default function UsuariosPage() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const perfil = profile?.perfil ?? "leitura";
 
   useEffect(() => {
@@ -498,7 +498,7 @@ export default function UsuariosPage() {
                       Cancelar
                     </Button>
                   </div>
-                  {editingId && perfil === "admin" && profile?.id !== editingId && (
+                  {editingId && perfil === "admin" && user?.id !== editingId && (
                     <Button
                       type="button"
                       variant="ghost"
