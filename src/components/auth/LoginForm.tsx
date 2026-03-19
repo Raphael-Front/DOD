@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Alert } from "@/components/ui";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -62,47 +63,47 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-[477px] space-y-8">
       <div>
-        <p className="text-sky-700 text-xl font-semibold font-[var(--font-sora)]">
+        <p className="text-[var(--color-accent-blue)] text-[var(--font-size-title3)] font-semibold font-[var(--font-sans)]">
           BEM-VINDO
         </p>
-        <h2 className="text-black text-3xl font-normal font-[var(--font-sora)] mt-1">
+        <h2 className="text-[var(--text-primary)] text-[var(--font-size-display)] font-normal font-[var(--font-sans)] mt-1">
           Acessar o sistema
         </h2>
-        <p className="text-neutral-400 text-xl font-extralight font-[var(--font-dm-sans)] mt-2">
+        <p className="text-[var(--text-tertiary)] text-[var(--font-size-title3)] font-light font-[var(--font-sans)] mt-2">
           Informe suas credenciais para continuar
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-black text-xl font-normal font-[var(--font-dm-sans)] mb-2">
+          <label className="block text-[var(--text-primary)] text-[var(--font-size-title3)] font-normal font-[var(--font-sans)] mb-2">
             E-mail
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-neutral-400" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--text-tertiary)]" strokeWidth={2} />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="nome@gplincorporadora.com.br"
-              className="w-full h-16 pl-12 pr-4 bg-white rounded-[10px] border border-neutral-400/50 text-xl font-medium font-[var(--font-dm-sans)] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-cyan-900/30 focus:border-cyan-900"
+              className="w-full h-16 pl-12 pr-4 bg-[var(--surface-card)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] text-[var(--font-size-title3)] font-medium font-[var(--font-sans)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-black text-xl font-normal font-[var(--font-dm-sans)] mb-2">
+          <label className="block text-[var(--text-primary)] text-[var(--font-size-title3)] font-normal font-[var(--font-sans)] mb-2">
             Senha
           </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-neutral-400" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--text-tertiary)]" strokeWidth={2} />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="*************"
-              className="w-full h-16 pl-12 pr-4 bg-white rounded-[10px] border border-neutral-400/50 text-xl font-medium font-[var(--font-dm-sans)] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-cyan-900/30 focus:border-cyan-900"
+              className="w-full h-16 pl-12 pr-4 bg-[var(--surface-card)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] text-[var(--font-size-title3)] font-medium font-[var(--font-sans)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
               required
             />
           </div>
@@ -114,33 +115,31 @@ export function LoginForm() {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-6 h-6 rounded border-neutral-400 text-cyan-900 focus:ring-cyan-900"
+              className="w-6 h-6 rounded border-[var(--border-medium)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
             />
-            <span className="text-neutral-500 text-base font-normal font-[var(--font-dm-sans)]">
+            <span className="text-[var(--text-secondary)] text-[var(--font-size-body)] font-normal font-[var(--font-sans)]">
               Manter conectado
             </span>
           </label>
           <Link
             href="/esqueci-senha"
-            className="text-sky-700 text-base font-normal font-[var(--font-dm-sans)] hover:underline"
+            className="text-[var(--color-accent-blue)] text-[var(--font-size-body)] font-normal font-[var(--font-sans)] hover:underline"
           >
             Esqueci a senha
           </Link>
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-            {error}
-          </div>
+          <Alert variant="error" description={error} />
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-12 bg-cyan-900 rounded-[10px] border border-neutral-400/50 text-white text-xl font-semibold font-[var(--font-dm-sans)] flex items-center justify-center gap-2 hover:bg-cyan-800 disabled:opacity-70 transition-colors"
+          className="w-full h-12 bg-[var(--color-primary)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] text-white text-[var(--font-size-title3)] font-semibold font-[var(--font-sans)] flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-70 transition-opacity"
         >
           {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} />
           ) : (
             "Entrar"
           )}
@@ -148,18 +147,18 @@ export function LoginForm() {
       </form>
 
       <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-neutral-400/50" />
-        <span className="text-neutral-400 text-xl font-medium font-[var(--font-dm-sans)]">
+        <div className="flex-1 h-px bg-[var(--border-medium)]" />
+        <span className="text-[var(--text-tertiary)] text-[var(--font-size-title3)] font-medium font-[var(--font-sans)]">
           ou
         </span>
-        <div className="flex-1 h-px bg-neutral-400/50" />
+        <div className="flex-1 h-px bg-[var(--border-medium)]" />
       </div>
 
       <button
         type="button"
         onClick={handleMicrosoftLogin}
         disabled={loading}
-        className="w-full h-12 bg-white rounded-[10px] border border-neutral-400/50 flex items-center justify-center gap-3 hover:bg-neutral-50 disabled:opacity-70 transition-colors"
+        className="w-full h-12 bg-[var(--surface-card)] rounded-[var(--radius-lg)] border border-[var(--border-medium)] flex items-center justify-center gap-3 hover:bg-[var(--surface-card-hover)] disabled:opacity-70 transition-colors"
       >
         <svg
           className="w-6 h-6"
@@ -172,7 +171,7 @@ export function LoginForm() {
           <rect y="11" width="10" height="10" fill="#00A4EF" />
           <rect x="11" y="11" width="10" height="10" fill="#FFB900" />
         </svg>
-        <span className="text-black text-xl font-medium font-[var(--font-dm-sans)]">
+        <span className="text-[var(--text-primary)] text-[var(--font-size-title3)] font-medium font-[var(--font-sans)]">
           Continuar com Microsoft
         </span>
       </button>

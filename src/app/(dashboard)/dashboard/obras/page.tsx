@@ -1,10 +1,10 @@
 export default function ObrasPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-semibold font-[var(--font-sora)] text-zinc-900">
+    <div>
+      <h1 className="text-[var(--font-size-title2)] font-semibold font-[var(--font-sans)] text-[var(--text-primary)]">
         Obras
       </h1>
-      <p className="text-neutral-500 font-[var(--font-dm-sans)] mt-1">
+      <p className="text-[var(--text-tertiary)] font-[var(--font-sans)] mt-1">
         Em breve: cadastro de obras
       </p>
     </div>

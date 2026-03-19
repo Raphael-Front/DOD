@@ -1,0 +1,14 @@
+---
+description: Consultar PRD.md antes de implementar funcionalidades do Diário de Obra
+alwaysApply: true
+---
+
+# Funcionalidades do Diário de Obra
+
+Ao implementar ou alterar funcionalidades do sistema Diário de Obra Digital:
+
+1. **Sempre leia o PRD** em `PRD.md` na raiz do projeto antes de implementar
+2. Implemente **estritamente conforme** os requisitos, regras de negócio e critérios de aceite do PRD
+3. Em conflito entre pedido do usuário e PRD, **priorize o PRD**
+4. Se o pedido estiver fora do escopo do MVP (seção 7 do PRD), informe o usuário antes de implementar
+5. Siga o **design-system-bim-audit.html** para cores, tipografia, layout e componentes de interface

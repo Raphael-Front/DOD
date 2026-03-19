@@ -1,0 +1,295 @@
+# 🧠 CURSOR RULES — BIM AUDIT
+# Design System: /design-system.html (raiz do projeto)
+# Fase: Desenvolvimento local (localhost)
+
+---
+
+## ⚠️ REGRA MAIS IMPORTANTE DO PROJETO
+
+Este projeto tem um design system definido em `/design-system.html` na raiz.
+ANTES de criar qualquer componente ou página, você DEVE:
+1. Usar os tokens CSS do design system (variáveis --color-*, --space-*, etc.)
+2. Seguir as classes e padrões de componentes já definidos
+3. NUNCA inventar cores, espaçamentos ou estilos que não existam no design system
+
+Se você não encontrar um componente no design system para o que precisa, PERGUNTE antes de criar algo novo.
+
+---
+
+## 🎨 DESIGN SYSTEM — TOKENS OBRIGATÓRIOS
+
+O design system está em `/design-system.html`. Os tokens abaixo são a fonte da verdade.
+Sempre importe ou referencie as variáveis CSS do projeto — NUNCA hardcode valores.
+
+### Fonte
+```css
+font-family: "DM Sans", -apple-system, sans-serif;  /* --font-sans */
+font-family: "DM Mono", Consolas, monospace;         /* --font-mono — apenas para código/IDs */
+```
+
+### Cores — USE APENAS ESTAS
+```
+--color-primary:       #1e3a5f   ← sidebar, topbar, botão principal
+--color-accent-blue:   #4a7fc1   ← links, ícones, botão accent
+--color-accent-teal:   #2ea8a8   ← KPI total de itens
+--color-accent-orange: #e8820c   ← alertas, datas, pendente
+--color-accent-green:  #22a04b   ← sucesso, conforme
+--color-accent-red:    #d93025   ← erro, não conforme, pendências críticas
+--color-gray-[50-900]            ← escala de neutros
+```
+
+### Superfícies — USE APENAS ESTAS
+```
+--surface-sidebar:  #1e3a5f   ← fundo da sidebar e topbar
+--surface-base:     #f4f6f8   ← fundo da página (NÃO use #fff nem #f0f0f0)
+--surface-card:     #ffffff   ← fundo de cards e painéis
+```
+
+### Espaçamento — ESCALA DE 4px
+```
+--space-1: 4px  | --space-2: 8px  | --space-3: 12px | --space-4: 16px
+--space-5: 20px | --space-6: 24px | --space-8: 32px | --space-12: 48px
+```
+NUNCA use valores arbitrários como padding: 15px, gap: 7px, margin: 22px.
+Use sempre múltiplos de 4 via variáveis.
+
+### Border Radius
+```
+--radius-sm: 4px | --radius-md: 6px | --radius-lg: 8px | --radius-xl: 12px
+```
+
+### Sombras
+```
+--shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)  ← padrão de card
+--shadow-sm:   0 1px 3px rgba(0,0,0,.08)
+--shadow-md:   0 4px 6px rgba(0,0,0,.07)
+```
+
+### Bordas
+```
+--border-light:  #e9ecef  ← padrão de card
+--border-medium: #dee2e6
+--border-strong: #ced4da
+```
+
+### Texto
+```
+--text-primary:    #1a2332  ← texto principal
+--text-secondary:  #495057  ← texto secundário
+--text-tertiary:   #6c757d  ← labels, hints, placeholders
+--text-on-primary: #ffffff  ← texto sobre fundo azul marinho
+```
+
+---
+
+## 🧩 COMPONENTES — PADRÕES OBRIGATÓRIOS
+
+### Layout da Aplicação
+```
+Estrutura fixa:
+├── Sidebar: 196px, fundo --surface-sidebar (#1e3a5f)
+├── Topbar: 56px height, fundo --surface-sidebar (#1e3a5f)
+└── Conteúdo: fundo --surface-base (#f4f6f8), padding 24-32px
+```
+NUNCA use fundo branco na área de conteúdo. O fundo da página é #f4f6f8.
+
+### KPI Cards
+```css
+/* Estrutura obrigatória */
+.kpi-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 18px 20px 16px;
+  position: relative;
+  overflow: hidden;
+}
+/* Borda superior colorida — OBRIGATÓRIA em todo KPI card */
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+/*
+  Cores da borda por tipo:
+  dark   → #2c3e50  (neutro / contagem)
+  teal   → #2ea8a8  (total / sincronizado)
+  orange → #e8820c  (data / alerta)
+  green  → #22a04b  (conformidade / sucesso)
+  red    → #d93025  (pendências / erro)
+*/
+
+/* Valor do KPI: 32px bold */
+.kpi-value {
+  font-size: var(--font-size-title1); /* 2rem / 32px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+```
+
+### Cards Genéricos
+```css
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5) var(--space-6); /* 20px 24px */
+}
+```
+
+### Sidebar
+```css
+/* Itens de navegação */
+color: rgba(255,255,255,0.65);        /* inativo */
+color: #ffffff;                        /* ativo */
+background: rgba(255,255,255,0.15);   /* item ativo */
+background: rgba(255,255,255,0.08);   /* hover */
+
+/* Labels de seção (PRINCIPAL, GESTÃO, CADASTROS) */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+color: rgba(255,255,255,0.35);
+```
+
+### Botões — Variantes disponíveis
+```
+btn-primary   → azul marinho (#1e3a5f) — ação principal
+btn-accent    → azul médio (#4a7fc1) — ação secundária importante
+btn-secondary → borda cinza, fundo branco — ação neutra
+btn-ghost     → transparente — ação terciária
+btn-danger    → vermelho (#d93025) — excluir/cancelar
+btn-success   → verde (#22a04b)
+btn-warning   → laranja (#e8820c)
+
+Tamanhos: btn-xs | btn-sm | btn-md | btn-lg
+```
+
+### Badges — Variantes disponíveis
+```
+badge-primary  → azul marinho
+badge-blue     → azul claro (info, disciplinas)
+badge-teal     → verde-água
+badge-green    → verde (conforme, sucesso)
+badge-orange   → laranja (pendente, atenção)
+badge-red      → vermelho (não conforme, crítico)
+badge-gray     → cinza (inativo, neutro)
+badge-outline  → outline sem cor
+```
+
+### Inputs
+```css
+.input {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-small);  /* 13px */
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);    /* 6px */
+  padding: 7px 11px;
+  background: var(--surface-card);
+}
+/* Estados */
+.input:focus  { border-color: var(--color-accent-blue); box-shadow: 0 0 0 3px rgba(74,127,193,.15); }
+.input.error  { border-color: var(--color-error); }
+.input.success{ border-color: var(--color-success); }
+```
+
+### Tabelas
+```
+- Thead: fundo #f8f9fa, texto uppercase 12px, cor --text-tertiary
+- Tbody: hover fundo #f8f9fa, border-bottom --border-light
+- Sempre envolto em container com border, border-radius e box-shadow
+```
+
+### Alertas
+```
+alert-info    → fundo #ddeeff, borda esquerda 3px #4a7fc1
+alert-success → fundo #d4edda, borda esquerda 3px #22a04b
+alert-warning → fundo #fff3cd, borda esquerda 3px #e8820c
+alert-error   → fundo #fce8e6, borda esquerda 3px #d93025
+```
+
+### Gráficos (Recharts ou similar)
+```
+Barras principais: gradiente linear #3a5fa0 → #6b8fd4
+Track/fundo das barras: #e9ecef
+Eixos e labels: #6c757d (--text-tertiary)
+Grid lines: #e9ecef (--border-light)
+Tooltip: fundo --surface-card, border --border-light, shadow --shadow-md
+```
+
+---
+
+## 🚫 PROIBIÇÕES ABSOLUTAS
+
+### Cores proibidas — NUNCA USE
+- Qualquer roxo/purple (não existe no design system)
+- #ffffff como fundo de página — use --surface-base (#f4f6f8)
+- #000000 ou preto puro para texto — use --text-primary (#1a2332)
+- Gradientes purple-to-blue ou qualquer gradiente não listado no DS
+- Qualquer cor não listada nos tokens acima
+
+### Tipografia proibida — NUNCA USE
+- Inter, Roboto, Arial, system-ui como fonte principal
+- Tamanhos arbitrários fora da escala do DS (ex: 14px, 17px, 11px)
+- font-weight fora de: 300 / 400 / 500 / 600 / 700
+
+### Estilos proibidos
+- style="" inline para cores, espaçamentos ou tipografia
+- !important
+- Valores de padding/margin que não sejam múltiplos de 4
+- box-shadow inventados — use apenas --shadow-*
+- border-radius arbitrários — use apenas --radius-*
+- Fundo cinza escuro ou azul escuro na área de conteúdo principal
+
+---
+
+## ✅ CHECKLIST ANTES DE CRIAR QUALQUER COMPONENTE
+
+1. [ ] O fundo da página está usando --surface-base (#f4f6f8)?
+2. [ ] Cards usam --surface-card + --border-light + --shadow-card?
+3. [ ] A fonte é DM Sans via --font-sans?
+4. [ ] Todas as cores vêm dos tokens do design system?
+5. [ ] Espaçamentos são múltiplos de 4 via variáveis --space-*?
+6. [ ] KPI cards têm a borda colorida de 3px no topo com ::before?
+7. [ ] Sidebar tem fundo --surface-sidebar (#1e3a5f)?
+8. [ ] Textos sobre fundo azul usam rgba(255,255,255,0.65) ou #fff?
+9. [ ] Nenhum valor de cor está hardcodado fora das variáveis CSS?
+
+---
+
+## 📐 TIPOGRAFIA — ESCALA PERMITIDA
+
+```
+12px → --font-size-mini   (labels nav, hints, badges, cabeçalho de tabela)
+13px → --font-size-small  (body de formulário, células de tabela)
+15px → --font-size-body   (texto padrão da interface)
+20px → --font-size-title3 (título de seção/card)
+24px → --font-size-title2 (título de página)
+32px → --font-size-title1 (valor de KPI — destaque)
+44px → --font-size-display (número em destaque máximo)
+```
+
+---
+
+## 🏗️ STACK DO PROJETO
+
+```
+Frontend:   [preencha: Next.js / React / Vue]
+Estilo:     [preencha: CSS Modules / Tailwind / styled-components]
+Roteamento: [preencha]
+Estado:     [preencha]
+Backend:    [preencha]
+```
+
+Se usar Tailwind: mapeie os tokens acima no tailwind.config.js e NUNCA
+use classes de cor padrão do Tailwind (blue-500, gray-100, etc.) —
+use apenas as cores customizadas mapeadas do design system BIM Audit.
+
+---
+
+*Fonte da verdade visual: /design-system.html — consulte antes de criar qualquer UI.*
