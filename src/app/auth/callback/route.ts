@@ -1,19 +1,54 @@
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+/** Evita open redirect: só paths relativos na mesma origem. */
+function safeNextPath(next: string | null): string {
+  const fallback = "/dashboard";
+  if (!next || !next.startsWith("/")) return fallback;
+  if (next.startsWith("//") || next.includes("://")) return fallback;
+  return next;
+}
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const next = safeNextPath(requestUrl.searchParams.get("next"));
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+  if (!code) {
+    return NextResponse.redirect(
+      new URL("/login?error=auth_failed", requestUrl.origin)
+    );
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  const redirectUrl = new URL(next, requestUrl.origin);
+  const response = NextResponse.redirect(redirectUrl);
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: { name: string; value: string; options?: object }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(
+      new URL("/login?error=auth_failed", requestUrl.origin)
+    );
+  }
+
+  return response;
 }
