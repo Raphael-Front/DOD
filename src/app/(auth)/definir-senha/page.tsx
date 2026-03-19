@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import LoginBranding from "../login/components/LoginBranding";
 
 export default function DefinirSenhaPage() {
@@ -13,6 +14,11 @@ export default function DefinirSenhaPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { refresh } = useAuth();
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

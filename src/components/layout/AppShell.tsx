@@ -28,7 +28,14 @@ import { useState, useEffect, useRef } from "react";
 import { clsx } from "clsx";
 import { useTheme } from "@/hooks/useTheme";
 
-const AUTH_PATHS = ["/login", "/auth/callback", "/esqueci-senha", "/cadastro", "/redefinir-senha"];
+const AUTH_PATHS = [
+  "/login",
+  "/auth/callback",
+  "/esqueci-senha",
+  "/cadastro",
+  "/redefinir-senha",
+  "/definir-senha",
+];
 
 async function fetchObras() {
   const supabase = createClient();
