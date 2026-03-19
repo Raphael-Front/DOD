@@ -17,6 +17,33 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+
+    // Supabase coloca erros no fragmento (#error=...&error_code=...) — não vai ao servidor
+    if (url.hash && url.hash.length > 1) {
+      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+      const errorCode = hashParams.get("error_code");
+      const errorDesc = hashParams.get("error_description");
+
+      if (errorCode === "otp_expired") {
+        setError(
+          "Este link de convite expirou ou já foi usado. Peça um novo convite ao administrador."
+        );
+        window.history.replaceState({}, "", "/login");
+        return;
+      }
+
+      if (hashParams.get("error") || errorCode) {
+        const decoded = errorDesc
+          ? decodeURIComponent(errorDesc.replace(/\+/g, " "))
+          : "Não foi possível concluir o acesso pelo link. Peça um novo convite ou entre com e-mail e senha.";
+        setError(decoded);
+        window.history.replaceState({}, "", "/login");
+        return;
+      }
+    }
+
     const params = new URLSearchParams(window.location.search);
     if (params.get("error") === "auth_failed") {
       setError(
