@@ -49,16 +49,24 @@ export async function GET(
   }
 
   // Buscar lançamentos
-  const { data: lancamentos, error } = await supabase
+  const { data: lancamentosRaw, error } = await supabase
     .from("f_folha_lancamentos")
     .select(`
       tarefa_mensal, liquido,
       d_colaboradores(nome, matricula)
     `)
-    .eq("folha_id", id)
-    .order("d_colaboradores(nome)", { ascending: true });
+    .eq("folha_id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Ordenar por nome do colaborador
+  const lancamentos = (lancamentosRaw ?? []).sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+    const dA = a.d_colaboradores as { nome?: string } | null;
+    const dB = b.d_colaboradores as { nome?: string } | null;
+    const nomeA = dA?.nome ?? "";
+    const nomeB = dB?.nome ?? "";
+    return nomeA.localeCompare(nomeB);
+  });
 
   // Formatar competência: MMAAAA
   const competenciaDate = new Date(folha.competencia + "T00:00:00");

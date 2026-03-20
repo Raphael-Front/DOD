@@ -25,8 +25,9 @@ type ColaboradorInfo = {
   data_admissao: string;
   num_dependentes: number;
   adicional_insalubridade: number;
-  funcao_id: string;
-  dim_funcoes: { nome: string } | null;
+  funcao?: string; // texto livre desde migração 20260319
+  funcao_id?: string; // legado
+  dim_funcoes?: { nome: string } | null; // legado
 };
 
 type Lancamento = {
@@ -109,7 +110,10 @@ async function fetchOuCriarFolha(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ obra_id: obraId, competencia, tipo }),
   });
-  if (!res.ok) throw new Error("Erro ao buscar/criar folha");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string })?.error ?? "Erro ao buscar/criar folha");
+  }
   return res.json();
 }
 
@@ -125,10 +129,18 @@ async function fetchServicos(): Promise<Servico[]> {
 
 async function fetchColabsDisponiveis(obraId: string): Promise<Array<{ id: string; nome: string; matricula: string; status: string }>> {
   const supabase = createClient();
+  // d_colaboradores usa empresa (TEXT) vinculada a dim_obras.numero_empresa desde migração 20260319
+  const { data: obra } = await supabase
+    .from("dim_obras")
+    .select("numero_empresa")
+    .eq("id", obraId)
+    .single();
+  const numeroEmpresa = obra?.numero_empresa != null ? String(obra.numero_empresa) : null;
+  if (!numeroEmpresa) return [];
   const { data } = await supabase
     .from("d_colaboradores")
     .select("id, nome, matricula, status")
-    .eq("obra_id", obraId)
+    .eq("empresa", numeroEmpresa)
     .neq("status", "demitido")
     .is("deleted_at", null)
     .order("nome");
@@ -412,7 +424,7 @@ export default function FolhaGridPage({
   const [exportando, setExportando] = useState(false);
 
   // 1. Buscar ou criar folha
-  const { data: folhaRef } = useQuery({
+  const { data: folhaRef, isError: erroFolhaRef, error: mensagemErro, isLoading: loadingFolhaRef } = useQuery({
     queryKey: ["folha-ref", obraId, competencia, tipo],
     queryFn: () => fetchOuCriarFolha(obraId, competencia, tipo),
     retry: false,
@@ -605,7 +617,7 @@ export default function FolhaGridPage({
     }
   };
 
-  if (isLoading) {
+  if (loadingFolhaRef || isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
         <span className="text-[var(--text-tertiary)]">Carregando folha...</span>
@@ -614,9 +626,12 @@ export default function FolhaGridPage({
   }
 
   if (!folha) {
+    const msgErro = erroFolhaRef && mensagemErro
+      ? mensagemErro.message
+      : "Folha não encontrada.";
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
-        <p className="text-[var(--text-tertiary)]">Folha não encontrada.</p>
+        <p className="text-[var(--text-tertiary)] text-center max-w-md">{msgErro}</p>
         <Button variant="secondary" onClick={() => router.push("/folha-de-pagamento")}>
           Voltar
         </Button>

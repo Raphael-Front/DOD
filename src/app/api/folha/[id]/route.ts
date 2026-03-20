@@ -6,35 +6,51 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-  const { data: folha, error: errFolha } = await supabase
-    .from("f_folhas")
-    .select("id, obra_id, competencia, tipo, status, debitada, created_at, dim_obras(nome)")
-    .eq("id", id)
-    .single();
+    const { data: folha, error: errFolha } = await supabase
+      .from("f_folhas")
+      .select("id, obra_id, competencia, tipo, status, debitada, created_at, dim_obras(nome)")
+      .eq("id", id)
+      .single();
 
-  if (errFolha || !folha) {
-    return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
-  }
+    if (errFolha || !folha) {
+      return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
+    }
 
-  // Carregar lançamentos com colaborador
-  const { data: lancamentos, error: errLanc } = await supabase
-    .from("f_folha_lancamentos")
-    .select(`
-      id, folha_id, colaborador_id, servico_etapa,
-      hora_tarefa, tarefa_mensal, he_50, he_100, faltas,
-      gratificacao, adicional, inss, irrf, vt, refeicao,
-      total_proventos, total_descontos, liquido,
-      d_colaboradores(nome, matricula, status, data_admissao, num_dependentes, adicional_insalubridade, funcao_id, dim_funcoes(nome))
-    `)
-    .eq("folha_id", id)
-    .order("d_colaboradores(nome)", { ascending: true });
+    // Carregar lançamentos com colaborador
+    // Nota: d_colaboradores usa obra/funcao (TEXT) desde migração 20260319, não mais obra_id/funcao_id
+    const { data: lancamentosRaw, error: errLanc } = await supabase
+      .from("f_folha_lancamentos")
+      .select(`
+        id, folha_id, colaborador_id, servico_etapa,
+        hora_tarefa, tarefa_mensal, he_50, he_100, faltas,
+        gratificacao, adicional, inss, irrf, vt, refeicao,
+        total_proventos, total_descontos, liquido,
+        d_colaboradores(nome, matricula, status, data_admissao, num_dependentes, adicional_insalubridade, funcao)
+      `)
+      .eq("folha_id", id);
 
-  if (errLanc) return NextResponse.json({ error: errLanc.message }, { status: 500 });
+    if (errLanc) {
+      console.error("[api/folha/[id]] errLanc:", errLanc);
+      return NextResponse.json(
+        { error: "Erro ao carregar lançamentos", detail: errLanc.message },
+        { status: 500 }
+      );
+    }
+
+  // Ordenar por nome do colaborador (Supabase não suporta order por coluna de FK)
+  const lancamentos = (lancamentosRaw ?? []).sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+    const dA = a.d_colaboradores as { nome?: string } | null;
+    const dB = b.d_colaboradores as { nome?: string } | null;
+    const nomeA = dA?.nome ?? "";
+    const nomeB = dB?.nome ?? "";
+    return nomeA.localeCompare(nomeB);
+  });
 
   // Carregar produção por lançamento
   const lancIds = (lancamentos ?? []).map((l: Record<string, unknown>) => l.id as string);
@@ -58,5 +74,12 @@ export async function GET(
     { proventos: 0, descontos: 0, liquido: 0 }
   );
 
-  return NextResponse.json({ folha, lancamentos: lancamentos ?? [], producao, totais });
+    return NextResponse.json({ folha, lancamentos, producao, totais });
+  } catch (err) {
+    console.error("[api/folha/[id]] Erro inesperado:", err);
+    return NextResponse.json(
+      { error: "Erro interno", detail: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
 }

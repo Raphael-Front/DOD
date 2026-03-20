@@ -32,18 +32,6 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-  // Verificar permissão
-  const { data: perfil } = await supabase
-    .from("dim_perfis")
-    .select("perfil")
-    .eq("id", user.id)
-    .single();
-
-  const perfisPermitidos = ["admin", "coordenador", "dp", "engenheiro"];
-  if (!perfil || !perfisPermitidos.includes(perfil.perfil)) {
-    return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
-  }
-
   const body = await request.json();
   const { obra_id, competencia, tipo } = body;
 
@@ -51,7 +39,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "obra_id, competencia e tipo são obrigatórios" }, { status: 400 });
   }
 
-  // Tentar buscar folha existente
+  // Tentar buscar folha existente (qualquer usuário autenticado pode obter para visualizar)
   const { data: existente } = await supabase
     .from("f_folhas")
     .select("*")
@@ -62,6 +50,21 @@ export async function POST(request: NextRequest) {
 
   if (existente) {
     return NextResponse.json(existente);
+  }
+
+  // Criar nova folha — exige perfil com permissão
+  const { data: perfil } = await supabase
+    .from("dim_perfis")
+    .select("perfil")
+    .eq("id", user.id)
+    .single();
+
+  const perfisPermitidos = ["admin", "coordenador", "dp", "engenheiro"];
+  if (!perfil || !perfisPermitidos.includes(perfil.perfil)) {
+    return NextResponse.json(
+      { error: "Sem permissão para criar folha. Entre em contato com um usuário com permissão de lançamento." },
+      { status: 403 }
+    );
   }
 
   // Criar nova folha
