@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useObra } from "@/contexts/ObraContext";
 import { DayPicker } from "react-day-picker";
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
@@ -111,7 +112,9 @@ async function fetchFolhasGerencial(): Promise<Array<{ id: string; obra_nome: st
 
 export default function RelatoriosPage() {
   const { profile } = useAuth();
-  const [obraId, setObraId] = useState<string>("");
+  const { obraId: obraIdGlobal, setObraId: setObraIdGlobal } = useObra();
+  const obraId = obraIdGlobal ?? "";
+  const setObraId = (id: string) => setObraIdGlobal(id || null);
   const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
   const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
   const [periodoOpen, setPeriodoOpen] = useState(false);

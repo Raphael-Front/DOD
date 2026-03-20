@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissoes } from "@/hooks/usePermissoes";
+import { useObra } from "@/contexts/ObraContext";
 import { Card, Badge, Button } from "@/components/ui";
 import { Receipt, ChevronRight } from "lucide-react";
 import { clsx } from "clsx";
@@ -68,11 +69,13 @@ export default function FolhaDePagamentoPage() {
   const router = useRouter();
   const { profile, status: authStatus } = useAuth();
   const { temPermissao, isLoading: loadingPerms } = usePermissoes();
+  const { obraId: obraIdGlobal, setObraId: setObraIdGlobal } = useObra();
 
   const perfil = profile?.perfil ?? "leitura";
   const podeLancar = temPermissao("lancar_folha");
 
-  const [obraId, setObraId] = useState("");
+  const obraId = obraIdGlobal ?? "";
+  const setObraId = (id: string) => setObraIdGlobal(id || null);
   const [mes, setMes] = useState(() => {
     const now = new Date();
     return String(now.getMonth() + 1).padStart(2, "0");
@@ -127,7 +130,7 @@ export default function FolhaDePagamentoPage() {
         </p>
       </div>
 
-      <Card className="max-w-2xl">
+      <Card>
         <h2 className="font-semibold text-[var(--text-primary)] mb-5">
           Seletor de contexto
         </h2>

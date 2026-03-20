@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DayPicker } from "react-day-picker";
 import { createClient } from "@/lib/supabase/client";
+import { useObra } from "@/contexts/ObraContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import {
@@ -122,9 +123,11 @@ async function criarDiario(obraId: string, data: string, retroativo: boolean, ju
 
 export default function NovoDiarioPage() {
   const queryClient = useQueryClient();
+  const { obraId: obraIdGlobal, setObraId: setObraIdGlobal } = useObra();
 
   const [fase, setFase] = useState<"config" | "preenchimento">("config");
-  const [obraId, setObraId] = useState<string>("");
+  const obraId = obraIdGlobal ?? "";
+  const setObraId = (id: string) => setObraIdGlobal(id || null);
   const [retroativo, setRetroativo] = useState(false);
   const [dataRetroativa, setDataRetroativa] = useState<Date | undefined>(subDays(new Date(), 1));
   const [justificativaRetro, setJustificativaRetro] = useState("");

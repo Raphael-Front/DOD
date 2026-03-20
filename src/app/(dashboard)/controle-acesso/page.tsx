@@ -424,137 +424,166 @@ export default function ControleAcessoPage() {
               <span className="text-[var(--font-size-small)]">Carregando matriz...</span>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[var(--font-size-small)] min-w-[720px]">
-                <thead>
-                  <tr className="border-b border-[var(--border-light)]">
-                    <th className="text-left px-4 py-3 font-semibold text-[var(--text-secondary)] w-40">
-                      Módulo
-                    </th>
-                    {grupos.map((g) => (
-                      <th key={g.id} className="text-center px-2 py-3 font-semibold text-[var(--text-secondary)] min-w-[140px]">
-                        <Badge variant={PERFIL_BADGE_VARIANT[g.slug] ?? "gray"}>{g.nome}</Badge>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {modulos.map((mod, idx) => (
-                    <tr
-                      key={mod.id}
-                      className={clsx(
-                        "border-b border-[var(--border-light)] last:border-0",
-                        idx % 2 === 0 ? "bg-[var(--surface-base)]" : "bg-[var(--surface-card)]"
-                      )}
-                    >
-                      <td className="px-4 py-3 font-medium text-[var(--text-primary)] align-top">
-                        {mod.nome}
-                        {mod.slug === "diario_obra" || mod.slug === "folha_pagamento" ? (
-                          <p className="text-[var(--font-size-mini)] text-[var(--text-tertiary)] font-normal mt-1">
-                            + extras abaixo
-                          </p>
-                        ) : null}
-                      </td>
-                      {grupos.map((g) => {
-                        const cell = getCell(g.id, mod.id);
-                        const edit = editandoMatriz;
-                        return (
-                          <td key={g.id} className="px-2 py-2 align-top">
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              <IconToggle
-                                active={cell.ler}
-                                disabled={!edit || !podeEditarMatriz}
-                                onClick={() =>
-                                  setCellField(g.id, mod.id, "ler", !cell.ler)
-                                }
-                                title="Ler / visualizar"
+            <div className="flex flex-col gap-6 p-5">
+              {/* Um card por grupo — módulos como colunas */}
+              {grupos.map((g) => {
+                const qtdModulos = modulos.filter((m) => {
+                  const cell = getCell(g.id, m.id);
+                  return cell.ler || cell.editar || cell.excluir || cell.aprovar;
+                }).length;
+                return (
+                  <Card
+                    key={g.id}
+                    className="border-[var(--border-light)] overflow-hidden"
+                  >
+                    <div className="px-5 py-4 border-b border-[var(--border-light)]">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={PERFIL_BADGE_VARIANT[g.slug] ?? "gray"}>
+                          {g.nome}
+                        </Badge>
+                        <span className="text-[var(--font-size-mini)] text-[var(--text-tertiary)]">
+                          {qtdModulos} módulo{qtdModulos !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 overflow-x-auto">
+                      <table className="w-full text-[var(--font-size-small)] min-w-[600px]">
+                        <thead>
+                          <tr className="border-b border-[var(--border-light)]">
+                            {modulos.map((mod) => (
+                              <th
+                                key={mod.id}
+                                className="text-center px-3 py-3 font-semibold text-[var(--text-secondary)] min-w-[120px] align-top"
                               >
-                                <Eye className="w-3.5 h-3.5" strokeWidth={2} />
-                              </IconToggle>
-                              {mod.permite_editar && (
-                                <IconToggle
-                                  active={cell.editar}
-                                  disabled={!edit || !podeEditarMatriz}
-                                  onClick={() =>
-                                    setCellField(g.id, mod.id, "editar", !cell.editar)
-                                  }
-                                  title="Editar"
+                                <div className="font-medium text-[var(--text-primary)]">
+                                  {mod.nome}
+                                </div>
+                                {(mod.slug === "diario_obra" ||
+                                  mod.slug === "folha_pagamento") && (
+                                  <p className="text-[var(--font-size-mini)] text-[var(--text-tertiary)] font-normal mt-0.5">
+                                    + extras
+                                  </p>
+                                )}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b border-[var(--border-light)]/60">
+                            {modulos.map((mod) => {
+                              const cell = getCell(g.id, mod.id);
+                              const edit = editandoMatriz;
+                              return (
+                                <td
+                                  key={mod.id}
+                                  className={clsx(
+                                    "px-2 py-3 align-top",
+                                    "border-r border-[var(--border-light)]/50 last:border-r-0"
+                                  )}
                                 >
-                                  <PencilLine className="w-3.5 h-3.5" strokeWidth={2} />
-                                </IconToggle>
-                              )}
-                              {mod.permite_excluir && (
-                                <IconToggle
-                                  active={cell.excluir}
-                                  disabled={!edit || !podeEditarMatriz}
-                                  onClick={() =>
-                                    setCellField(g.id, mod.id, "excluir", !cell.excluir)
-                                  }
-                                  title="Excluir"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
-                                </IconToggle>
-                              )}
-                              {mod.tem_aprovar && (
-                                <IconToggle
-                                  active={cell.aprovar}
-                                  disabled={!edit || !podeEditarMatriz}
-                                  onClick={() =>
-                                    setCellField(g.id, mod.id, "aprovar", !cell.aprovar)
-                                  }
-                                  title="Aprovar"
-                                >
-                                  <BadgeCheck className="w-3.5 h-3.5" strokeWidth={2} />
-                                </IconToggle>
-                              )}
-                            </div>
-                            {mod.slug === "diario_obra" && (
-                              <div className="flex flex-wrap gap-1 justify-center mt-1 pt-1 border-t border-[var(--border-light)]/60">
-                                <span className="text-[10px] text-[var(--text-tertiary)] w-full text-center">
-                                  Reabrir diário
-                                </span>
-                                <IconToggle
-                                  active={Boolean(cell.extras.reabrir_diario)}
-                                  disabled={!edit || !podeEditarMatriz}
-                                  onClick={() => toggleExtra(g.id, mod.id, "reabrir_diario")}
-                                  title="Reabrir diário aprovado"
-                                >
-                                  <ShieldCheck className="w-3 h-3" strokeWidth={2} />
-                                </IconToggle>
-                              </div>
-                            )}
-                            {mod.slug === "folha_pagamento" && (
-                              <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-[var(--border-light)]/60">
-                                {(
-                                  [
-                                    ["exportar_uau", "Exportar UAU"],
-                                    ["debitar_folha", "Debitar"],
-                                    ["alterar_parametros_folha", "Parâmetros"],
-                                  ] as const
-                                ).map(([k, label]) => (
-                                  <div key={k} className="flex items-center justify-center gap-1">
-                                    <span className="text-[9px] text-[var(--text-tertiary)] truncate max-w-[56px]">
-                                      {label}
-                                    </span>
+                                  <div className="flex flex-wrap gap-1 justify-center">
                                     <IconToggle
-                                      active={Boolean(cell.extras[k])}
+                                      active={cell.ler}
                                       disabled={!edit || !podeEditarMatriz}
-                                      onClick={() => toggleExtra(g.id, mod.id, k)}
-                                      title={label}
+                                      onClick={() =>
+                                        setCellField(g.id, mod.id, "ler", !cell.ler)
+                                      }
+                                      title="Ler / visualizar"
                                     >
-                                      <Check className="w-3 h-3" strokeWidth={2} />
+                                      <Eye className="w-3.5 h-3.5" strokeWidth={2} />
                                     </IconToggle>
+                                    {mod.permite_editar && (
+                                      <IconToggle
+                                        active={cell.editar}
+                                        disabled={!edit || !podeEditarMatriz}
+                                        onClick={() =>
+                                          setCellField(g.id, mod.id, "editar", !cell.editar)
+                                        }
+                                        title="Editar"
+                                      >
+                                        <PencilLine className="w-3.5 h-3.5" strokeWidth={2} />
+                                      </IconToggle>
+                                    )}
+                                    {mod.permite_excluir && (
+                                      <IconToggle
+                                        active={cell.excluir}
+                                        disabled={!edit || !podeEditarMatriz}
+                                        onClick={() =>
+                                          setCellField(g.id, mod.id, "excluir", !cell.excluir)
+                                        }
+                                        title="Excluir"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                                      </IconToggle>
+                                    )}
+                                    {mod.tem_aprovar && (
+                                      <IconToggle
+                                        active={cell.aprovar}
+                                        disabled={!edit || !podeEditarMatriz}
+                                        onClick={() =>
+                                          setCellField(g.id, mod.id, "aprovar", !cell.aprovar)
+                                        }
+                                        title="Aprovar"
+                                      >
+                                        <BadgeCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                                      </IconToggle>
+                                    )}
                                   </div>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                                  {mod.slug === "diario_obra" && (
+                                    <div className="flex flex-wrap gap-1 justify-center mt-1 pt-1 border-t border-[var(--border-light)]/60">
+                                      <span className="text-[10px] text-[var(--text-tertiary)] w-full text-center block">
+                                        Reabrir diário
+                                      </span>
+                                      <IconToggle
+                                        active={Boolean(cell.extras.reabrir_diario)}
+                                        disabled={!edit || !podeEditarMatriz}
+                                        onClick={() =>
+                                          toggleExtra(g.id, mod.id, "reabrir_diario")
+                                        }
+                                        title="Reabrir diário aprovado"
+                                      >
+                                        <ShieldCheck className="w-3 h-3" strokeWidth={2} />
+                                      </IconToggle>
+                                    </div>
+                                  )}
+                                  {mod.slug === "folha_pagamento" && (
+                                    <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-[var(--border-light)]/60">
+                                      {(
+                                        [
+                                          ["exportar_uau", "Exportar UAU"],
+                                          ["debitar_folha", "Debitar"],
+                                          ["alterar_parametros_folha", "Parâmetros"],
+                                        ] as const
+                                      ).map(([k, label]) => (
+                                        <div
+                                          key={k}
+                                          className="flex items-center justify-center gap-1"
+                                        >
+                                          <span className="text-[9px] text-[var(--text-tertiary)] truncate max-w-[56px]">
+                                            {label}
+                                          </span>
+                                          <IconToggle
+                                            active={Boolean(cell.extras[k])}
+                                            disabled={!edit || !podeEditarMatriz}
+                                            onClick={() => toggleExtra(g.id, mod.id, k)}
+                                            title={label}
+                                          >
+                                            <Check className="w-3 h-3" strokeWidth={2} />
+                                          </IconToggle>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </CardContent>
